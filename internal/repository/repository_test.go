@@ -8,7 +8,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
+func TestDestinationsOnlyIncludesDirectRoute(t *testing.T) {
 	db, err := sql.Open("sqlite", "file:destinations-test?mode=memory&cache=shared")
 	if err != nil {
 		t.Fatal(err)
@@ -39,7 +39,7 @@ func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
 	for _, station := range destinations {
 		got[station.Name] = true
 	}
-	for _, want := range []string{"Tanah Abang", "Jurangmangu", "Bogor"} {
+	for _, want := range []string{"Tanah Abang", "Bogor"} {
 		if !got[want] {
 			t.Errorf("destination %q was not selectable", want)
 		}
@@ -47,8 +47,11 @@ func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
 	if got["Manggarai"] {
 		t.Error("origin station must not be selectable as its own destination")
 	}
+	if got["Jurangmangu"] {
+		t.Error("one-transfer station must not be shown in the direct destination picker")
+	}
 	if got["Tangerang"] {
-		t.Error("unreachable station must not be selectable")
+		t.Error("unreachable station must not be shown in the direct destination picker")
 	}
 }
 
