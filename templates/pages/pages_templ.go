@@ -66,7 +66,7 @@ func homeContent(stations []models.Station, fromID, toID int64, info models.Sche
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"mb-7\"><div class=\"flex items-center justify-between\"><a href=\"/\" class=\"text-xl font-black tracking-tight\">🚆 RailNow</a> <span id=\"live-clock\" class=\"text-sm font-medium text-slate-500\"></span></div><h1 class=\"mt-7 text-4xl font-black tracking-tight\">Find your<br><span class=\"text-blue-600\">next train.</span></h1><p class=\"mt-2 text-slate-500\">Fast commuter schedules, without the fuss.</p></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"mb-7\"><div class=\"flex items-center justify-between\"><a href=\"/\" class=\"text-xl font-black tracking-tight\">🚆 RailNow</a> <span id=\"live-clock\" class=\"text-sm font-medium text-slate-500\"></span></div><h1 class=\"mt-7 text-4xl font-black tracking-tight\">Cari jadwal <br><span class=\"text-blue-600\">KRL mu</span></h1><p class=\"mt-2 text-slate-500\">Fast commuter schedules, without the fuss.</p></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
