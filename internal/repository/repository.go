@@ -33,12 +33,31 @@ func (r *Repository) Station(ctx context.Context, id int64) (models.Station, err
 	return s, err
 }
 func (r *Repository) Destinations(ctx context.Context, from int64) ([]models.Station, error) {
-	rows, err := r.db.QueryContext(ctx, `SELECT DISTINCT s.id, s.code, s.name, s.line
-		FROM schedules origin
-		JOIN schedules destination ON destination.train_id = origin.train_id AND destination.sequence > origin.sequence
-		JOIN stations s ON s.id = destination.station_id
-		WHERE origin.station_id = ?
-		ORDER BY s.name`, from)
+	// A destination is selectable when it is reachable directly or with one
+	// interchange at one of RailNow's supported hubs. This keeps the picker
+	// useful for routes such as Manggarai → Jurangmangu without exposing every
+	// station as a dead-end option.
+	rows, err := r.db.QueryContext(ctx, `WITH hubs AS (
+			SELECT id FROM stations WHERE LOWER(name) IN ('manggarai', 'tanah abang', 'duri', 'jatinegara')
+		), direct AS (
+			SELECT DISTINCT destination.station_id
+			FROM schedules origin
+			JOIN schedules destination ON destination.train_id = origin.train_id AND destination.sequence > origin.sequence
+			WHERE origin.station_id = ?
+		), one_transfer AS (
+			SELECT DISTINCT second_destination.station_id
+			FROM schedules first_origin
+			JOIN schedules first_destination ON first_destination.train_id = first_origin.train_id AND first_destination.sequence > first_origin.sequence
+			JOIN hubs ON hubs.id = first_destination.station_id
+			JOIN schedules second_origin ON second_origin.station_id = hubs.id
+			JOIN schedules second_destination ON second_destination.train_id = second_origin.train_id AND second_destination.sequence > second_origin.sequence
+			WHERE first_origin.station_id = ?
+		)
+		SELECT s.id, s.code, s.name, s.line
+		FROM stations s
+		JOIN (SELECT station_id FROM direct UNION SELECT station_id FROM one_transfer) selectable ON selectable.station_id = s.id
+		WHERE s.id <> ?
+		ORDER BY s.name`, from, from, from)
 	if err != nil {
 		return nil, err
 	}
