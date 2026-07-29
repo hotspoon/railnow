@@ -21,7 +21,8 @@ func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
 			(1, 'MRI', 'Manggarai', 'Bogor'),
 			(2, 'THB', 'Tanah Abang', 'Rangkas Bitung'),
 			(3, 'JMU', 'Jurangmangu', 'Rangkas Bitung'),
-			(4, 'BOO', 'Bogor', 'Bogor');
+			(4, 'BOO', 'Bogor', 'Bogor'),
+			(5, 'TNG', 'Tangerang', 'Tangerang');
 		INSERT INTO schedules VALUES
 			(10, 1, 1), (10, 2, 2),
 			(20, 2, 1), (20, 3, 2),
@@ -45,6 +46,9 @@ func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
 	}
 	if got["Manggarai"] {
 		t.Error("origin station must not be selectable as its own destination")
+	}
+	if got["Tangerang"] {
+		t.Error("unreachable station must not be selectable")
 	}
 }
 

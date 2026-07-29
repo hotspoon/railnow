@@ -1,6 +1,22 @@
 const SAVED_KEY = "railnow.savedRoutes";
 const RECENT_KEY = "railnow.recentStations";
 let allowedDestinations = null;
+let destinationRequest = 0;
+let destinationTimer = null;
+
+function debounce(callback, delay) {
+  let timer = null;
+  return function () {
+    const args = arguments;
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => callback.apply(null, args), delay);
+  };
+}
+
+function scheduleDestinationOptions(from) {
+  window.clearTimeout(destinationTimer);
+  destinationTimer = window.setTimeout(() => updateDestinationOptions(from), 180);
+}
 
 function jakartaTime() {
   try {
@@ -66,12 +82,17 @@ function setStation(target, id, name) {
   document.querySelector(`#${target}-options`).hidden = true;
   const recents = read(RECENT_KEY).filter((station) => station.id !== id);
   write(RECENT_KEY, [{ id, name }, ...recents].slice(0, 5));
-  if (target === "from") updateDestinationOptions(id);
+  if (target === "from") scheduleDestinationOptions(id);
 }
 async function updateDestinationOptions(from) {
+  const requestID = ++destinationRequest;
   const trigger = document.querySelector("#to-trigger");
   const swap = document.querySelector("#swap-route");
   const originalLabel = trigger ? trigger.textContent : "";
+  const controller = typeof AbortController === "undefined" ? null : new AbortController();
+  const timeoutID = controller
+    ? window.setTimeout(() => controller.abort(), 8000)
+    : null;
   if (trigger) {
     trigger.disabled = true;
     trigger.textContent = "Loading destinations…";
@@ -80,9 +101,11 @@ async function updateDestinationOptions(from) {
   try {
     const response = await fetch(
       `/stations/destination-options?from=${encodeURIComponent(from)}`,
+      controller ? { signal: controller.signal } : undefined,
     );
     if (!response.ok) return;
     const destinations = await response.json();
+    if (requestID !== destinationRequest || !Array.isArray(destinations)) return;
     const allowed = new Set(destinations.map((station) => String(station.ID)));
     allowedDestinations = allowed;
     document
@@ -98,6 +121,8 @@ async function updateDestinationOptions(from) {
   } catch (error) {
     /* Keep the currently rendered options when offline. */
   } finally {
+    if (timeoutID) window.clearTimeout(timeoutID);
+    if (requestID !== destinationRequest) return;
     if (trigger) {
       trigger.disabled = false;
       if (trigger.textContent === "Loading destinations…")
@@ -121,11 +146,11 @@ function initStations() {
       panel.hidden = !panel.hidden;
       if (!panel.hidden) document.querySelector(`#${target}-query`).focus();
     });
-    if (target === "from" && selected) updateDestinationOptions(selected);
+    if (target === "from" && selected) scheduleDestinationOptions(selected);
   });
   document.querySelectorAll(".station-query").forEach((input) => {
     const target = input.dataset.target;
-    input.addEventListener("input", () => {
+    const filterOptions = debounce(() => {
       const term = normalize(input.value);
       const options = document.querySelector(`#${target}-options`);
       document
@@ -142,7 +167,8 @@ function initStations() {
             notAllowed || (term.length >= 2 && !searchable.includes(term));
         });
       options.hidden = false;
-    });
+    }, 100);
+    input.addEventListener("input", filterOptions);
   });
   document.addEventListener("click", (event) => {
     const option = event.target.closest("[data-station-id]");
@@ -175,7 +201,7 @@ function initStations() {
       );
       delete swap.dataset.swapping;
     }, 280);
-    updateDestinationOptions(from.value);
+    scheduleDestinationOptions(from.value);
   });
 }
 function initSaved() {

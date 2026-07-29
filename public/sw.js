@@ -1,10 +1,10 @@
-const CACHE = 'railnow-v6';
+const CACHE = 'railnow-v8';
 const APP_SHELL = [
   '/',
-  '/css/output.css?v=20260730-4',
-  '/css/station-select.css?v=20260730-4',
-  '/js/htmx.min.js?v=20260730-4',
-  '/js/app.js?v=20260730-4',
+  '/css/output.css?v=20260730-6',
+  '/css/station-select.css?v=20260730-6',
+  '/js/htmx.min.js?v=20260730-6',
+  '/js/app.js?v=20260730-6',
   '/images/snow-white-2-600.png',
 ];
 
