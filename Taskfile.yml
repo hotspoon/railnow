@@ -52,6 +52,12 @@ tasks:
       - curl -fsSL https://raw.githubusercontent.com/dedewanta/scraping-krl-jabodetabek/master/dim_station.csv -o .cache/krl/dim_station.csv
       - go run ./cmd/importer --input .cache/krl/commuter_line_schedule.csv --replace
 
+  refresh:schedules:
+    desc: Manually scrape published KAI Commuter CSV files then atomically replace timetable data
+    cmds:
+      - go run ./cmd/scraper --out .cache/kai
+      - go run ./cmd/importer --input .cache/kai/commuter_line_schedule.csv --stations .cache/kai/dim_station.csv --replace
+
   migrate-up:
     desc: Apply SQLite migrations manually
     cmds:

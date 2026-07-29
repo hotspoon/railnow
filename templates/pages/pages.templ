@@ -8,11 +8,11 @@ import (
 	"github.com/hotspoon/railnow/templates/layout"
 )
 
-templ Home(stations, destinations []models.Station, fromID, toID int64, favorites, recents []models.Favorite, info models.ScheduleInfo) {
-	@layout.Page("Your next train", homeContent(stations, destinations, fromID, toID, favorites, recents, info))
+templ Home(stations []models.Station, fromID, toID int64, info models.ScheduleInfo) {
+	@layout.Page("Your next train", homeContent(stations, fromID, toID, info))
 }
 
-templ homeContent(stations, destinations []models.Station, fromID, toID int64, favorites, recents []models.Favorite, info models.ScheduleInfo) {
+templ homeContent(stations []models.Station, fromID, toID int64, info models.ScheduleInfo) {
 	<header class="mb-7">
 		<div class="flex items-center justify-between">
 			<a href="/" class="text-xl font-black tracking-tight">🚆 RailNow</a>
@@ -21,62 +21,49 @@ templ homeContent(stations, destinations []models.Station, fromID, toID int64, f
 		<h1 class="mt-7 text-4xl font-black tracking-tight">Find your<br/><span class="text-blue-600">next train.</span></h1>
 		<p class="mt-2 text-slate-500">Fast commuter schedules, without the fuss.</p>
 	</header>
-	@components.SearchForm(stations, destinations, fromID, toID)
+	@components.SearchForm(stations, fromID, toID)
 	@scheduleNotice(info, "mt-3")
 	<section id="schedule-results" class="mt-6"></section>
-	if len(favorites) > 0 {
-		<section id="favorites" class="mt-8">
-			<h2 class="mb-3 text-lg font-bold">Your routes</h2>
-			<div class="grid gap-3">
-				for _, f := range favorites {
-					<a href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", f.FromID, f.ToID)) } class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-						<span class="text-yellow-500">★</span><span class="ml-2 text-xs font-bold uppercase tracking-wider text-slate-400">{ f.Label }</span>
-						<div class="mt-2">
-							@components.Route(f.From, f.To)
-						</div>
-					</a>
-				}
-			</div>
-		</section>
-	}
-	if len(recents) > 0 {
-		<section class="mt-8">
-			<h2 class="mb-3 text-lg font-bold">Recent</h2>
-			<div class="space-y-2">
-				for _, r := range recents {
-					<a class="block text-sm text-slate-500" href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", r.FromID, r.ToID)) }>{ r.From } → { r.To }</a>
-				}
-			</div>
-		</section>
-	}
 }
 
 templ scheduleNotice(info models.ScheduleInfo, classes string) {
 	<p class={ classes + " text-xs text-slate-400" }>
-		Jadwal acuan
-		if info.SnapshotDate != "" {
-			<span>· { info.SnapshotDate }</span>
+		Scheduled timetable
+		if info.EffectiveDate != "" {
+			<span>· Effective { info.EffectiveDate }</span>
+		}
+		if info.FetchedAt != "" {
+			<span>· Updated { info.FetchedAt }</span>
+		}
+		if info.Stale {
+			<strong class="ml-1 text-amber-600">Schedule data may be out of date.</strong>
 		}
 	</p>
 }
 
 templ SearchResult(page models.SearchPage) {
-	<section id="schedule-results" class="animate-in" hx-get={ templcore.SafeURL(fmt.Sprintf("/schedule?from=%d&to=%d", page.From.ID, page.To.ID)) } hx-trigger="every 60s" hx-swap="outerHTML">
+	<section id="schedule-results" class="animate-in">
 		<div class="mb-2 flex items-center justify-between">
 			@components.Route(page.From.Name, page.To.Name)
-			@components.FavoriteButton(page.From.ID, page.To.ID, page.IsFavorite)
+			@components.FavoriteButton(page.From.ID, page.To.ID, false)
 		</div>
 		@scheduleNotice(page.ScheduleInfo, "mb-4")
-		if len(page.Departures) == 0 {
+		if len(page.Departures) == 0 && len(page.Transfers) == 0 {
 			<div class="rounded-3xl bg-white p-6 text-center text-slate-500 shadow-sm">No scheduled trains on this route yet.</div>
-		} else {
+		} else if len(page.Departures) > 0 {
 			@nextCard(page.Departures[0])
 			<h2 class="mb-3 mt-7 text-lg font-bold">Upcoming</h2>
 			<div class="space-y-3">
 				for _, d := range page.Departures[1:] {
-					@trainCard(d)
+				@trainCard(d, page.From.ID, page.To.ID)
 				}
 			</div>
+		}
+		if len(page.Transfers) > 0 {
+			<h2 class="mb-3 mt-7 text-lg font-bold">Transfer options</h2>
+			for _, trip := range page.Transfers {
+				<article class="mb-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"><strong>{ trip.First.Departure } → { trip.Second.Arrival }</strong><p class="mt-1 text-sm text-slate-500">Change at { trip.Transfer.Name } · { fmt.Sprintf("%d min wait", trip.WaitMinutes) } · { fmt.Sprintf("%d min total", trip.TotalMinutes) }</p><p class="mt-1 text-xs text-slate-400">{ trip.First.Route } → { trip.Second.Route }</p></article>
+			}
 		}
 	</section>
 }
@@ -96,16 +83,16 @@ templ nextCard(d models.Departure) {
 	</article>
 }
 
-templ trainCard(d models.Departure) {
-	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d", d.TrainID)) } class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800"><time class="text-2xl font-black">{ d.Departure }</time><span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-sm font-semibold text-blue-600">Details ›</span></a>
+templ trainCard(d models.Departure, from, to int64) {
+	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800"><time class="text-2xl font-black">{ d.Departure }</time><span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-sm font-semibold text-blue-600">Details ›</span></a>
 }
 
-templ TrainDetail(stops []models.Stop, info models.ScheduleInfo) {
-	@layout.Page("Train details", trainContent(stops, info))
+templ TrainDetail(stops []models.Stop, info models.ScheduleInfo, backURL string) {
+	@layout.Page("Train details", trainContent(stops, info, backURL))
 }
 
-templ trainContent(stops []models.Stop, info models.ScheduleInfo) {
-	<a href="/" class="text-sm font-bold text-blue-600">‹ Back</a>
+templ trainContent(stops []models.Stop, info models.ScheduleInfo, backURL string) {
+	<a href={ templcore.SafeURL(backURL) } class="text-sm font-bold text-blue-600">‹ Back to results</a>
 	<h1 class="mt-6 text-3xl font-black">Train stops</h1>
 	<p class="mt-1 text-slate-500">Waktu keberangkatan dari setiap stasiun</p>@scheduleNotice(info, "mt-3")
 	<div class="mt-7 space-y-0">
@@ -114,3 +101,9 @@ templ trainContent(stops []models.Stop, info models.ScheduleInfo) {
 		}
 	</div>
 }
+
+templ Saved() {
+	@layout.Page("Saved routes", savedContent())
+}
+
+templ savedContent() { <section><h1 class="text-3xl font-black">Saved routes</h1><p class="mt-2 text-slate-500">Routes saved on this device.</p><div id="saved-routes" class="mt-6 space-y-3"></div></section> }

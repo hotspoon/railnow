@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/hotspoon/railnow/internal/database"
 	"github.com/pressly/goose/v3"
@@ -212,7 +213,7 @@ func importData(db *sql.DB, stations map[string]station, trains []train, replace
 			}
 		}
 	}
-	for key, value := range map[string]string{"source": "dedewanta/scraping-krl-jabodetabek (KAI Commuter API snapshot)", "snapshot_date": "24 Mar 2024", "day_type": "Jenis hari tidak diketahui", "limitations": "Bukan data real-time; waktu tiba perantara diestimasi dari waktu berangkat."} {
+	for key, value := range map[string]string{"source": "KAI Commuter schedule scraper", "source_name": "KAI Commuter website", "source_url": "https://www.commuterline.id/layanan/info-pelanggan/jadwal", "snapshot_date": time.Now().Format("02 Jan 2006"), "effective_date": "GAPEKA 2025", "fetched_at": time.Now().UTC().Format(time.RFC3339), "day_type": "Jenis hari tidak diketahui", "limitations": "Scheduled timetable only; intermediate arrival times may be estimated."} {
 		if _, err = tx.Exec(`INSERT INTO schedule_metadata(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`, key, value); err != nil {
 			return err
 		}

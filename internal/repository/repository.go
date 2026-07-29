@@ -142,7 +142,7 @@ func (r *Repository) IsFavorite(ctx context.Context, from, to int64) (bool, erro
 }
 
 func (r *Repository) ScheduleInfo(ctx context.Context) (models.ScheduleInfo, error) {
-	rows, err := r.db.QueryContext(ctx, `SELECT key, value FROM schedule_metadata WHERE key IN ('snapshot_date', 'day_type')`)
+	rows, err := r.db.QueryContext(ctx, `SELECT key, value FROM schedule_metadata WHERE key IN ('snapshot_date', 'day_type', 'effective_date', 'source_name', 'source_url', 'fetched_at')`)
 	if err != nil {
 		return models.ScheduleInfo{}, err
 	}
@@ -159,8 +159,30 @@ func (r *Repository) ScheduleInfo(ctx context.Context) (models.ScheduleInfo, err
 		if key == "day_type" {
 			info.DayType = value
 		}
+		if key == "effective_date" {
+			info.EffectiveDate = value
+		}
+		if key == "source_name" {
+			info.SourceName = value
+		}
+		if key == "source_url" {
+			info.SourceURL = value
+		}
+		if key == "fetched_at" {
+			info.FetchedAt = value
+		}
 	}
-	return info, rows.Err()
+	if err := rows.Err(); err != nil {
+		return info, err
+	}
+	if info.FetchedAt != "" {
+		if fetched, err := time.Parse(time.RFC3339, info.FetchedAt); err == nil {
+			info.Stale = time.Since(fetched) > 30*24*time.Hour
+		}
+	} else if snapshot, err := time.Parse("02 Jan 2006", info.SnapshotDate); err == nil {
+		info.Stale = time.Since(snapshot) > 30*24*time.Hour
+	}
+	return info, nil
 }
 func minutes(a, b string) int {
 	base := "2006-01-02 "

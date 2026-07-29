@@ -29,17 +29,12 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 	}
 	fromID := stationIDByCode(stations, "MRI")
 	toID := stationIDByCode(stations, "BOO")
-	destinations, e := h.service.Destinations(r.Context(), fromID)
-	if e != nil {
-		http.Error(w, "Could not load destinations", 500)
-		return
-	}
-	fav, recent, info, e := h.service.Home(r.Context())
+	info, e := h.service.Home(r.Context())
 	if e != nil {
 		http.Error(w, "Could not load routes", 500)
 		return
 	}
-	render(w, r, pages.Home(stations, destinations, fromID, toID, fav, recent, info))
+	render(w, r, pages.Home(stations, fromID, toID, info))
 }
 func stationIDByCode(stations []models.Station, code string) int64 {
 	for _, station := range stations {
@@ -119,22 +114,10 @@ func (h *Handler) Train(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load schedule metadata", 500)
 		return
 	}
-	render(w, r, pages.TrainDetail(stops, info))
+	backURL := "/"
+	if from, to, err := ids(r); err == nil {
+		backURL = "/search?from=" + strconv.FormatInt(from, 10) + "&to=" + strconv.FormatInt(to, 10)
+	}
+	render(w, r, pages.TrainDetail(stops, info, backURL))
 }
-func (h *Handler) Favorite(w http.ResponseWriter, r *http.Request) {
-	if e := r.ParseForm(); e != nil {
-		http.Error(w, "Invalid form", 400)
-		return
-	}
-	from, to, e := ids(r)
-	if e != nil {
-		http.Error(w, "Invalid route", 400)
-		return
-	}
-	active, e := h.service.ToggleFavorite(r.Context(), from, to)
-	if e != nil {
-		http.Error(w, "Could not save favorite", 500)
-		return
-	}
-	render(w, r, components.FavoriteButton(from, to, active))
-}
+func (h *Handler) Saved(w http.ResponseWriter, r *http.Request) { render(w, r, pages.Saved()) }

@@ -32,6 +32,8 @@ task import:krl
 
 This downloads CSV files into the ignored `.cache/` directory and replaces the local SQLite data. The importer preserves each train's ordered stops based on its departure times. The source does not provide per-stop arrival times, so RailNow uses the departure time for both arrival and departure until a more detailed source is available.
 
+To refresh from a published KAI Commuter schedule CSV manually, set `KAI_SCHEDULE_CSV_URL` and `KAI_STATIONS_CSV_URL` to the current published CSV links, then run `task refresh:schedules`. The scraper validates downloads before the importer starts, so a scraping failure never replaces the currently active timetable.
+
 Install the Task runner once if it is not available:
 
 ```sh

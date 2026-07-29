@@ -1,4 +1,21 @@
 @import "tailwindcss";
+
+.station-options button {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+}
+
+.station-options button:hover,
+.station-options button:focus-visible {
+  background: #eff6ff;
+  outline: none;
+}
+
+.station-options span { color: #64748b; font-size: 0.75rem; }
 @source "../../templates";
 @source "../../public/js";
 

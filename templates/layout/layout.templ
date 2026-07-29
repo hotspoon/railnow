@@ -14,18 +14,20 @@ templ Page(title string, content templ.Component) {
 			<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png"/>
 			<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png"/>
 			<link rel="stylesheet" href="/css/output.css"/>
+			<link rel="stylesheet" href="/css/station-select.css"/>
 			<script src="/js/htmx.min.js" defer></script>
 			<script src="/js/app.js" defer></script>
 			<title>{ title } · RailNow</title>
 		</head>
 		<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
+			<div id="offline-banner" class="hidden bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-900">Menampilkan jadwal tersimpan; cek kembali saat online.</div>
 			<main class="mx-auto min-h-screen max-w-lg px-4 pb-24 pt-6">
 				@content
 			</main>
 			<nav class="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
 				<div class="mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500">
 					<a class="text-blue-600" href="/">⌂<span class="ml-1">Home</span></a>
-					<a href="/#favorites">☆<span class="ml-1">Saved</span></a>
+					<a href="/saved">☆<span class="ml-1">Saved</span></a>
 					<button aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐ Theme</button>
 				</div>
 			</nav>

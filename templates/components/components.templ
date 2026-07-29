@@ -5,17 +5,31 @@ import (
 	"github.com/hotspoon/railnow/internal/models"
 )
 
-templ SearchForm(stations, destinations []models.Station, fromID, toID int64) {
+templ SearchForm(stations []models.Station, fromID, toID int64) {
 	<form class="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800" hx-get="/search" hx-target="#schedule-results" hx-indicator="#search-loading">
 		<label class="block text-xs font-bold uppercase tracking-widest text-slate-400">From</label>
-  <select name="from" class="mt-1 w-full bg-transparent py-2 text-lg font-semibold outline-none" hx-get="/stations/destinations" hx-trigger="change" hx-target="#to-station" hx-swap="outerHTML">
+		<button type="button" id="from-trigger" class="station-trigger mt-1 w-full py-2 text-left text-lg font-semibold" data-target="from">Select station</button>
+		<input id="from" name="from" type="hidden" value={ fmt.Sprintf("%d", fromID) }/>
+		<div id="from-options" class="station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800" role="listbox" hidden>
+			<input id="from-query" class="station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800" autocomplete="off" placeholder="Search station" data-target="from"/>
+			<div class="station-option-list mt-1">
 			for _, s := range stations {
-				<option value={ fmt.Sprintf("%d", s.ID) } selected?={ s.ID == fromID }>{ s.Name }</option>
+				<button type="button" role="option" data-station-id={ fmt.Sprintf("%d", s.ID) } data-station-name={ s.Name }>{ s.Name } <span>{ s.Code }</span></button>
 			}
-		</select>
+			</div>
+		</div>
 		<div class="my-1 border-t border-dashed border-slate-200"></div>
-  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">To</label>
-  @DestinationSelect(destinations, toID)
+		<div class="flex items-center justify-between"><label class="block text-xs font-bold uppercase tracking-widest text-slate-400">To</label><button type="button" id="swap-route" class="text-sm font-bold text-blue-600">Swap</button></div>
+		<button type="button" id="to-trigger" class="station-trigger mt-1 w-full py-2 text-left text-lg font-semibold" data-target="to">Select station</button>
+		<input id="to" name="to" type="hidden" value={ fmt.Sprintf("%d", toID) }/>
+		<div id="to-options" class="station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800" role="listbox" hidden>
+			<input id="to-query" class="station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800" autocomplete="off" placeholder="Search station" data-target="to"/>
+			<div class="station-option-list mt-1">
+				for _, s := range stations {
+					<button type="button" role="option" data-station-id={ fmt.Sprintf("%d", s.ID) } data-station-name={ s.Name }>{ s.Name } <span>{ s.Code }</span></button>
+				}
+			</div>
+		</div>
 		<button class="mt-4 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]">Find next train</button>
 		<div id="search-loading" class="htmx-indicator mt-3 text-center text-sm text-slate-400">Finding trains…</div>
 	</form>
@@ -34,14 +48,5 @@ templ Route(from, to string) {
 }
 
 templ FavoriteButton(from, to int64, active bool) {
-	<form hx-post="/favorite" hx-target="this" hx-swap="outerHTML">
-		<input type="hidden" name="from" value={ fmt.Sprintf("%d", from) }/><input type="hidden" name="to" value={ fmt.Sprintf("%d", to) }/>
-		<button class="rounded-full border px-3 py-1.5 text-sm font-semibold" aria-label="Toggle favorite">
-			if active {
-				<span>★ Saved</span>
-			} else {
-				<span>☆ Save route</span>
-			}
-		</button>
-	</form>
+	<button type="button" class="save-route rounded-full border px-3 py-1.5 text-sm font-semibold" data-from={ fmt.Sprintf("%d", from) } data-to={ fmt.Sprintf("%d", to) } aria-label="Toggle saved route">☆ Save route</button>
 }

@@ -21,6 +21,6 @@ func NewHandler(db *sql.DB) *chi.Mux {
 	r.Get("/schedule", h.Schedule)
 	r.Get("/stations/destinations", h.Destinations)
 	r.Get("/train/{id}", h.Train)
-	r.Post("/favorite", h.Favorite)
+	r.Get("/saved", h.Saved)
 	return r
 }
