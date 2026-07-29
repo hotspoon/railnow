@@ -297,7 +297,15 @@ safelyInitialize(updateOffline);
 window.addEventListener("online", updateOffline);
 window.addEventListener("offline", updateOffline);
 window.addEventListener("pageshow", resetSearchLoading);
-if ("serviceWorker" in navigator)
-  window.addEventListener("load", () =>
-    navigator.serviceWorker.register("/sw.js"),
-  );
+// Timetables should always be fetched from the server. Remove the legacy
+// worker so an earlier deployment cannot keep serving stale scripts or pages.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .then(() => ("caches" in window ? caches.keys() : []))
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .catch((error) => console.warn("RailNow cache cleanup unavailable", error));
+  });
+}

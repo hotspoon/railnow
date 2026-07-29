@@ -29,7 +29,7 @@ func Page(title string, content templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#294b9b\"><meta name=\"description\" content=\"Fast commuter train schedules\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"icon\" href=\"/icons/favicon.ico\" sizes=\"any\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/icons/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/icons/favicon-16x16.png\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/icons/apple-touch-icon.png\"><link rel=\"stylesheet\" href=\"/css/output.css?v=20260730-7\"><link rel=\"stylesheet\" href=\"/css/station-select.css?v=20260730-7\"><script src=\"/js/htmx.min.js?v=20260730-7\" defer></script><script src=\"/js/app.js?v=20260730-7\" defer></script><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#294b9b\"><meta name=\"description\" content=\"Fast commuter train schedules\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"icon\" href=\"/icons/favicon.ico\" sizes=\"any\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/icons/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/icons/favicon-16x16.png\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/icons/apple-touch-icon.png\"><link rel=\"stylesheet\" href=\"/css/output.css?v=20260730-9\"><link rel=\"stylesheet\" href=\"/css/station-select.css?v=20260730-9\"><script src=\"/js/htmx.min.js?v=20260730-9\" defer></script><script src=\"/js/app.js?v=20260730-9\" defer></script><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,7 +42,7 @@ func Page(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · RailNow</title></head><body class=\"winter-storybook min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50\"><div id=\"offline-banner\" class=\"hidden bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-900\">Menampilkan jadwal tersimpan; cek kembali saat online.</div><main class=\"mx-auto min-h-screen max-w-lg px-4 pb-24 pt-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · RailNow</title></head><body class=\"winter-storybook min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50\"><div id=\"offline-banner\" class=\"hidden bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-900\">You are offline; check again when online.</div><main class=\"mx-auto min-h-screen max-w-lg px-4 pb-24 pt-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
