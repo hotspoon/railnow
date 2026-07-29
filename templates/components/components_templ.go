@@ -34,7 +34,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form class=\"rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800\" hx-get=\"/search\" hx-target=\"#schedule-results\" hx-indicator=\"#search-loading\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">From</label> <button type=\"button\" id=\"from-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"from\">Select station</button> <input id=\"from\" name=\"from\" type=\"hidden\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form class=\"storybook-select-card rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800\" hx-get=\"/search\" hx-target=\"#schedule-results\" hx-swap=\"outerHTML\" hx-indicator=\"#search-loading\" hx-push-url=\"true\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">From</label> <button type=\"button\" id=\"from-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"from\">Select station</button> <input id=\"from\" name=\"from\" type=\"hidden\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

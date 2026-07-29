@@ -4,4 +4,101 @@
 .station-options button:hover, .station-options button:focus-visible { background: #eff6ff; outline: 0; }
 .station-options span { color: #64748b; font-size: .75rem; }
 .station-trigger:disabled, #swap-route:disabled, #search-submit:disabled { cursor: wait; opacity: .6; }
+#swap-route { cursor: pointer; transition: color .15s ease, transform .2s ease; }
+#swap-route:not(:disabled):hover { color: #1d4ed8; }
+.station-trigger.is-swapping { animation: station-swap .28s ease; }
+#swap-route.is-swapping { animation: swap-turn .28s ease; }
+@keyframes station-swap { 50% { opacity: .35; transform: translateY(5px); } }
+@keyframes swap-turn { 50% { transform: rotate(180deg) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .station-trigger.is-swapping, #swap-route.is-swapping { animation: none; } }
 .compact-train-route { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.line-badge { display: block; width: fit-content; max-width: 100%; margin-top: .25rem; overflow: hidden; border-radius: 999px; padding: .2rem .5rem; color: #fff; font-size: .7rem; font-weight: 700; line-height: 1.1; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.line-bogor { background: #dc2626; }
+.line-cikarang { background: #2563eb; }
+.line-rangkas { background: #16a34a; }
+.line-tangerang { background: #a16207; }
+.line-priok { background: #db2777; }
+.line-regional { background: #7c3aed; }
+
+/* Snow-white storybook palette: cloud-white paper, royal blue, apple red, and gold. */
+.winter-storybook {
+  background:
+    radial-gradient(circle at 10% 8%, rgba(255,255,255,.98) 0 4%, transparent 4.3%),
+    radial-gradient(circle at 87% 14%, rgba(255,255,255,.75) 0 3%, transparent 3.3%),
+    linear-gradient(145deg, #dcecff 0%, #f9fcff 48%, #fff6d9 100%) !important;
+  color: #17213e;
+  font-family: "Avenir Next Rounded", "Nunito", ui-rounded, system-ui, sans-serif;
+}
+.winter-storybook main { position: relative; isolation: isolate; }
+.winter-storybook main > * { position: relative; z-index: 1; }
+.winter-storybook main::before {
+  content: "✦  ·  ✦";
+  position: absolute;
+  top: .25rem;
+  right: 1.25rem;
+  color: #e5ae32;
+  font-size: .8rem;
+  letter-spacing: .25rem;
+	pointer-events: none;
+	z-index: 0;
+}
+.winter-storybook main::after {
+	content: "";
+	position: absolute;
+	top: -.8rem;
+	right: -.75rem;
+	width: 14rem;
+	height: 19rem;
+	background: url("/images/snow-white-2.png") top right / contain no-repeat;
+	opacity: .4;
+	pointer-events: none;
+	z-index: 0;
+}
+.winter-storybook .bg-white,
+.winter-storybook .station-options {
+  background: rgba(255,255,255,.92) !important;
+  border-color: #c8d9f2 !important;
+  box-shadow: 0 8px 22px rgba(49, 78, 142, .12);
+}
+.winter-storybook .bg-blue-600 {
+  background: linear-gradient(135deg, #385fb4, #23448f) !important;
+  box-shadow: 0 10px 22px rgba(35, 68, 143, .25) !important;
+}
+.winter-storybook .text-blue-600 { color: #294b9b !important; }
+.winter-storybook .text-slate-900 { color: #17213e !important; }
+.winter-storybook .text-slate-500 { color: #60728f !important; }
+.winter-storybook .text-slate-400 { color: #8394ae !important; }
+.winter-storybook .border-slate-200 { border-color: #c8d9f2 !important; }
+.winter-storybook .save-route {
+  border-color: #d8a72c;
+  background: #fffaf0;
+  color: #7e231f;
+  box-shadow: 0 3px 0 #e9c56f;
+}
+.winter-storybook .save-route:active { transform: translateY(2px); box-shadow: 0 1px 0 #e9c56f; }
+.winter-storybook #search-submit { border: 2px solid #f5d36f; }
+.winter-storybook nav {
+  border-color: #c8d9f2 !important;
+  background: rgba(255,255,255,.9) !important;
+  box-shadow: 0 -6px 20px rgba(49, 78, 142, .08);
+}
+.winter-storybook .station-trigger,
+.winter-storybook .station-query { color: #17213e; }
+.winter-storybook .station-query { border: 1px solid #d5e3f5; background: #f7fbff; }
+.winter-storybook .line-badge { box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.storybook-select-card {
+  background-image:
+    linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.94) 56%, rgba(255,255,255,.25) 100%),
+    url("/images/snow-white.png") !important;
+  background-position: center, right -1.5rem bottom -2.5rem;
+  background-repeat: no-repeat;
+  background-size: cover, 12.5rem auto;
+}
+.storybook-select-card .station-trigger,
+.storybook-select-card #swap-route,
+.storybook-select-card #search-submit,
+.storybook-select-card label { position: relative; z-index: 1; }
+@media (max-width: 380px) {
+  .storybook-select-card { background-position: center, right -2.5rem bottom -2rem; background-size: cover, 10rem auto; }
+	.winter-storybook main::after { width: 11.5rem; height: 15.5rem; right: -1rem; opacity: .34; }
+}

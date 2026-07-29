@@ -30,6 +30,7 @@ func main() {
 	r.Handle("/css/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
 	r.Handle("/js/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
 	r.Handle("/icons/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
+	r.Handle("/images/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/icons/favicon.ico") })
 	r.Get("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/manifest.webmanifest") })
 	r.Get("/sw.js", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/sw.js") })

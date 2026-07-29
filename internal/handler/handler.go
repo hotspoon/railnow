@@ -71,7 +71,12 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 		render(w, r, pages.SearchResult(p))
 		return
 	}
-	render(w, r, pages.SearchPage(p))
+	stations, e := h.service.Stations(r.Context())
+	if e != nil {
+		http.Error(w, "Could not load stations", 500)
+		return
+	}
+	render(w, r, pages.SearchHome(stations, from, to, p))
 }
 func (h *Handler) Schedule(w http.ResponseWriter, r *http.Request) {
 	from, to, e := ids(r)

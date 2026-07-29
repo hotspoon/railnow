@@ -143,11 +143,24 @@ function initStations() {
       to = document.querySelector("#to");
     const fromTrigger = document.querySelector("#from-trigger"),
       toTrigger = document.querySelector("#to-trigger");
+    const swap = document.querySelector("#swap-route");
+    if (!from.value || !to.value || swap.dataset.swapping) return;
+    swap.dataset.swapping = "true";
     [from.value, to.value] = [to.value, from.value];
     [fromTrigger.textContent, toTrigger.textContent] = [
       toTrigger.textContent,
       fromTrigger.textContent,
     ];
+    [fromTrigger, toTrigger, swap].forEach((element) =>
+      element.classList.add("is-swapping"),
+    );
+    window.setTimeout(() => {
+      [fromTrigger, toTrigger, swap].forEach((element) =>
+        element.classList.remove("is-swapping"),
+      );
+      delete swap.dataset.swapping;
+    }, 280);
+    updateDestinationOptions(from.value);
   });
 }
 function initSaved() {
@@ -197,6 +210,11 @@ function setSearchLoading(form, loading) {
   button.textContent = loading ? "Finding trains…" : button.dataset.label;
   form.setAttribute("aria-busy", String(loading));
 }
+function resetSearchLoading() {
+  document.querySelectorAll("form").forEach((form) => {
+    if (form.querySelector("#search-submit")) setSearchLoading(form, false);
+  });
+}
 document.body.addEventListener("htmx:beforeRequest", (event) => {
   const form = event.detail.elt?.closest("form");
   if (form?.querySelector("#search-submit")) setSearchLoading(form, true);
@@ -205,6 +223,22 @@ document.body.addEventListener("htmx:afterRequest", (event) => {
   const form = event.detail.elt?.closest("form");
   if (form?.querySelector("#search-submit")) setSearchLoading(form, false);
 });
+document.body.addEventListener("htmx:sendError", resetSearchLoading);
+document.body.addEventListener("htmx:responseError", resetSearchLoading);
+document.addEventListener("click", (event) => {
+  const detail = event.target.closest(".train-detail-link");
+  if (detail) {
+    sessionStorage.setItem("railnow.detail-return", "true");
+    return;
+  }
+  const back = event.target.closest("[data-back-results]");
+  if (!back || sessionStorage.getItem("railnow.detail-return") !== "true") return;
+  const referrer = new URL(document.referrer || location.href);
+  if (referrer.origin !== location.origin || referrer.pathname !== "/search") return;
+  event.preventDefault();
+  sessionStorage.removeItem("railnow.detail-return");
+  history.back();
+});
 tick();
 setInterval(tick, 1000);
 initStations();
@@ -212,6 +246,7 @@ initSaved();
 updateOffline();
 window.addEventListener("online", updateOffline);
 window.addEventListener("offline", updateOffline);
+window.addEventListener("pageshow", resetSearchLoading);
 if ("serviceWorker" in navigator)
   window.addEventListener("load", () =>
     navigator.serviceWorker.register("/sw.js"),
