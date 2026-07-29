@@ -26,7 +26,7 @@ func (q *Queries) GetStationByID(ctx context.Context, id int64) (Station, error)
 }
 
 const listStations = `-- name: ListStations :many
-SELECT id, code, name, line FROM stations ORDER BY name
+SELECT id, code, name, line FROM stations WHERE EXISTS (SELECT 1 FROM schedules WHERE schedules.station_id = stations.id) ORDER BY name
 `
 
 func (q *Queries) ListStations(ctx context.Context) ([]Station, error) {

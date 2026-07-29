@@ -59,7 +59,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("%d", s.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -72,7 +72,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(s.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 110}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -85,7 +85,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(s.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 122}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(s.Code)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 138}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/components.templ`, Line: 17, Col: 139}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -184,7 +184,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><button id=\"search-submit\" class=\"mt-4 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Find next train\">Find next train</button><div id=\"search-loading\" class=\"htmx-indicator mt-3 text-center text-sm text-slate-400\" role=\"status\">Finding trains…</div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><button id=\"search-submit\" class=\"mt-4 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Find next train\">Find next train</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

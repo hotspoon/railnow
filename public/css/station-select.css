@@ -4,3 +4,4 @@
 .station-options button:hover, .station-options button:focus-visible { background: #eff6ff; outline: 0; }
 .station-options span { color: #64748b; font-size: .75rem; }
 .station-trigger:disabled, #swap-route:disabled, #search-submit:disabled { cursor: wait; opacity: .6; }
+.compact-train-route { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

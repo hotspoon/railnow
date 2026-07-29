@@ -32,7 +32,17 @@ task import:krl
 
 This downloads CSV files into the ignored `.cache/` directory and replaces the local SQLite data. The importer preserves each train's ordered stops based on its departure times. The source does not provide per-stop arrival times, so RailNow uses the departure time for both arrival and departure until a more detailed source is available.
 
-To refresh from a published KAI Commuter schedule CSV manually, set `KAI_SCHEDULE_CSV_URL` and `KAI_STATIONS_CSV_URL` to the current published CSV links, then run `task refresh:schedules`. The scraper validates downloads before the importer starts, so a scraping failure never replaces the currently active timetable.
+To refresh Turso from KAI Commuter's public schedule API, ensure `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` are set, then run:
+
+```sh
+task refresh:schedules
+```
+
+The command first reads KAI Commuter's public station catalog, then fetches every enabled station sequentially (500 ms apart), and writes a raw diagnostic snapshot to the ignored `.cache/kci/` directory. It also checkpoints each successful station in a date-scoped progress file, so rerunning after a timeout resumes unfinished stations instead of downloading the completed ones again. It validates the complete result before replacing `trains` and `schedules` in one Turso transaction; `favorites` and `searches` are preserved. A failed request, parse, validation, or write leaves the active timetable unchanged.
+
+Some API routes terminate beyond the station-picker catalog. RailNow records those published terminal destinations with deterministic `KCI_DEST_*` codes so the journey remains searchable; they are marked as destination-only stations.
+
+This is a **KAI Commuter API schedule snapshot**, not real-time train tracking, position, or delay information. The old published-CSV scraper remains available through `go run ./cmd/scraper` and `go run ./cmd/importer` for historical/manual imports.
 
 Install the Task runner once if it is not available:
 

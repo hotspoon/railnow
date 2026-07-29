@@ -53,10 +53,14 @@ tasks:
       - go run ./cmd/importer --input .cache/krl/commuter_line_schedule.csv --replace
 
   refresh:schedules:
-    desc: Manually scrape published KAI Commuter CSV files then atomically replace timetable data
+    desc: Fetch the KAI Commuter public schedule API and atomically refresh Turso
     cmds:
-      - go run ./cmd/scraper --out .cache/kai
-      - go run ./cmd/importer --input .cache/kai/commuter_line_schedule.csv --stations .cache/kai/dim_station.csv --replace
+      - go run ./cmd/refresh-kci
+
+  refresh:kci:
+    desc: Alias for refresh:schedules
+    cmds:
+      - task: refresh:schedules
 
   migrate-up:
     desc: Apply SQLite migrations manually

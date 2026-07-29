@@ -12,7 +12,7 @@ type Repository struct{ db *sql.DB }
 func New(db *sql.DB) *Repository { return &Repository{db: db} }
 
 func (r *Repository) Stations(ctx context.Context) ([]models.Station, error) {
-	rows, err := r.db.QueryContext(ctx, `SELECT id, code, name, line FROM stations ORDER BY name`)
+	rows, err := r.db.QueryContext(ctx, `SELECT id, code, name, line FROM stations WHERE EXISTS (SELECT 1 FROM schedules WHERE schedules.station_id = stations.id) ORDER BY name`)
 	if err != nil {
 		return nil, err
 	}
