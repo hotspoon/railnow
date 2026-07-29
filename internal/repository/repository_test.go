@@ -47,3 +47,9 @@ func TestDestinationsIncludesOneTransferRoute(t *testing.T) {
 		t.Error("origin station must not be selectable as its own destination")
 	}
 }
+
+func TestClockTimeDropsKCISeconds(t *testing.T) {
+	if got := clockTime("05:34:30"); got != "05:34" {
+		t.Fatalf("clockTime() = %q, want 05:34", got)
+	}
+}

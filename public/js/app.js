@@ -3,18 +3,28 @@ const RECENT_KEY = "railnow.recentStations";
 let allowedDestinations = null;
 
 function jakartaTime() {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Jakarta",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  });
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Jakarta",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
+  } catch (error) {
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }
 }
 function jakartaSeconds() {
   const parts = jakartaTime().formatToParts();
-  const value = (type) =>
-    Number(parts.find((part) => part.type === type)?.value || 0);
+  const value = (type) => {
+    const part = parts.find((candidate) => candidate.type === type);
+    return Number(part ? part.value : 0);
+  };
   return value("hour") * 3600 + value("minute") * 60 + value("second");
 }
 function tick() {
@@ -24,25 +34,29 @@ function tick() {
     const [h, m] = el.dataset.countdown.split(":").map(Number);
     let diff = h * 3600 + m * 60 - jakartaSeconds();
     if (el.dataset.nextDay === "true" || diff < 0) diff += 24 * 3600;
-    el.textContent = `${String(Math.floor(diff / 60)).padStart(2, "0")}:${String(diff % 60).padStart(2, "0")}`;
+    const hours = Math.floor(diff / 3600);
+    const minutes = Math.floor((diff % 3600) / 60);
+    el.textContent = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   });
 }
 function read(key) {
   try {
     const value = JSON.parse(localStorage.getItem(key));
     return Array.isArray(value) ? value : [];
-  } catch {
+  } catch (error) {
     return [];
   }
 }
 function write(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    // Opera private mode may deny storage. The current interaction still works.
+  }
 }
 function stationName(id) {
-  return (
-    document.querySelector(`[data-station-id="${id}"]`)?.dataset.stationName ||
-    id
-  );
+  const station = document.querySelector(`[data-station-id="${id}"]`);
+  return station && station.dataset.stationName ? station.dataset.stationName : id;
 }
 function setStation(target, id, name) {
   document.querySelector(`#${target}`).value = id;
@@ -57,7 +71,7 @@ function setStation(target, id, name) {
 async function updateDestinationOptions(from) {
   const trigger = document.querySelector("#to-trigger");
   const swap = document.querySelector("#swap-route");
-  const originalLabel = trigger?.textContent;
+  const originalLabel = trigger ? trigger.textContent : "";
   if (trigger) {
     trigger.disabled = true;
     trigger.textContent = "Loading destinations…";
@@ -81,7 +95,7 @@ async function updateDestinationOptions(from) {
       const first = destinations[0];
       if (first) setStation("to", String(first.ID), first.Name);
     }
-  } catch {
+  } catch (error) {
     /* Keep the currently rendered options when offline. */
   } finally {
     if (trigger) {
@@ -138,7 +152,8 @@ function initStations() {
       .id.replace("-options", "");
     setStation(target, option.dataset.stationId, option.dataset.stationName);
   });
-  document.querySelector("#swap-route")?.addEventListener("click", () => {
+  const swapButton = document.querySelector("#swap-route");
+  if (swapButton) swapButton.addEventListener("click", () => {
     const from = document.querySelector("#from"),
       to = document.querySelector("#to");
     const fromTrigger = document.querySelector("#from-trigger"),
@@ -199,9 +214,8 @@ function initSaved() {
   }
 }
 function updateOffline() {
-  document
-    .querySelector("#offline-banner")
-    ?.classList.toggle("hidden", navigator.onLine);
+  const banner = document.querySelector("#offline-banner");
+  if (banner) banner.classList.toggle("hidden", navigator.onLine);
 }
 function setSearchLoading(form, loading) {
   const button = form.querySelector("#search-submit");
@@ -216,12 +230,14 @@ function resetSearchLoading() {
   });
 }
 document.body.addEventListener("htmx:beforeRequest", (event) => {
-  const form = event.detail.elt?.closest("form");
-  if (form?.querySelector("#search-submit")) setSearchLoading(form, true);
+  const element = event.detail && event.detail.elt;
+  const form = element && element.closest ? element.closest("form") : null;
+  if (form && form.querySelector("#search-submit")) setSearchLoading(form, true);
 });
 document.body.addEventListener("htmx:afterRequest", (event) => {
-  const form = event.detail.elt?.closest("form");
-  if (form?.querySelector("#search-submit")) setSearchLoading(form, false);
+  const element = event.detail && event.detail.elt;
+  const form = element && element.closest ? element.closest("form") : null;
+  if (form && form.querySelector("#search-submit")) setSearchLoading(form, false);
 });
 document.body.addEventListener("htmx:sendError", resetSearchLoading);
 document.body.addEventListener("htmx:responseError", resetSearchLoading);
@@ -239,11 +255,19 @@ document.addEventListener("click", (event) => {
   sessionStorage.removeItem("railnow.detail-return");
   history.back();
 });
-tick();
-setInterval(tick, 1000);
-initStations();
-initSaved();
-updateOffline();
+function safelyInitialize(callback) {
+  try {
+    callback();
+  } catch (error) {
+    // Keep independent controls usable if a browser blocks one optional API.
+    console.warn("RailNow enhancement unavailable", error);
+  }
+}
+safelyInitialize(tick);
+setInterval(() => safelyInitialize(tick), 1000);
+safelyInitialize(initStations);
+safelyInitialize(initSaved);
+safelyInitialize(updateOffline);
 window.addEventListener("online", updateOffline);
 window.addEventListener("offline", updateOffline);
 window.addEventListener("pageshow", resetSearchLoading);

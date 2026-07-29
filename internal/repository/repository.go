@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/hotspoon/railnow/internal/models"
+	"strings"
 	"time"
 )
 
@@ -84,6 +85,8 @@ func (r *Repository) Departures(ctx context.Context, from, to int64, fromTime st
 		if err := rows.Scan(&d.TrainID, &d.Number, &d.Route, &d.Departure, &d.Arrival); err != nil {
 			return nil, err
 		}
+		d.Departure = clockTime(d.Departure)
+		d.Arrival = clockTime(d.Arrival)
 		d.Duration = minutes(d.Departure, d.Arrival)
 		out = append(out, d)
 	}
@@ -101,9 +104,24 @@ func (r *Repository) Stops(ctx context.Context, trainID int64) ([]models.Stop, e
 		if err := rows.Scan(&s.Name, &s.Arrival, &s.Departure, &s.Sequence); err != nil {
 			return nil, err
 		}
+		s.Arrival = clockTime(s.Arrival)
+		s.Departure = clockTime(s.Departure)
 		out = append(out, s)
 	}
 	return out, rows.Err()
+}
+
+// clockTime accepts the KCI API's HH:MM:SS values and returns the HH:MM
+// representation used everywhere in the interface and timetable calculations.
+func clockTime(value string) string {
+	value = strings.TrimSpace(value)
+	for _, format := range []string{"15:04:05", "15:04"} {
+		parsed, err := time.Parse(format, value)
+		if err == nil {
+			return parsed.Format("15:04")
+		}
+	}
+	return value
 }
 func (r *Repository) RecordSearch(ctx context.Context, from, to int64) error {
 	_, err := r.db.ExecContext(ctx, `INSERT INTO searches(from_station,to_station) VALUES(?,?)`, from, to)

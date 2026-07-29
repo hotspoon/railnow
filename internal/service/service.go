@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/hotspoon/railnow/internal/models"
 	"github.com/hotspoon/railnow/internal/repository"
 	"sort"
@@ -105,8 +106,22 @@ func (s *Service) Transfers(ctx context.Context, from, to models.Station, now st
 
 func minutes(start, end string) int {
 	base := "2006-01-02 "
-	a, _ := time.Parse("2006-01-02 15:04", base+start)
-	b, _ := time.Parse("2006-01-02 15:04", base+end)
+	parse := func(value string) (time.Time, error) {
+		for _, layout := range []string{"2006-01-02 15:04:05", "2006-01-02 15:04"} {
+			if parsed, err := time.Parse(layout, base+value); err == nil {
+				return parsed, nil
+			}
+		}
+		return time.Time{}, fmt.Errorf("invalid timetable value %q", value)
+	}
+	a, err := parse(start)
+	if err != nil {
+		return 0
+	}
+	b, err := parse(end)
+	if err != nil {
+		return 0
+	}
 	if b.Before(a) {
 		b = b.Add(24 * time.Hour)
 	}
