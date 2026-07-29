@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import "../../public/css/station-select.css";
 
 const station = (id, name, code) =>
   `<button type="button" data-station-id="${id}" data-station-name="${name}">${name} <span>${code}</span></button>`;
@@ -61,6 +62,11 @@ describe("station picker", () => {
     expect(document.querySelector('#from-options [data-station-id="2"]').hidden).toBe(false);
     expect(document.querySelector('#from-options [data-station-id="1"]').hidden).toBe(true);
     expect(document.querySelector('#from-options [data-station-id="3"]').hidden).toBe(true);
+    expect(
+      getComputedStyle(
+        document.querySelector('#from-options [data-station-id="1"]'),
+      ).display,
+    ).toBe("none");
   });
 
   it("only exposes direct destinations after choosing an origin", async () => {
@@ -75,6 +81,11 @@ describe("station picker", () => {
     expect(document.querySelector('#to-options [data-station-id="3"]').hidden).toBe(false);
     expect(document.querySelector('#to-options [data-station-id="2"]').hidden).toBe(true);
     expect(document.querySelector('#to-options [data-station-id="4"]').hidden).toBe(true);
+    expect(
+      getComputedStyle(
+        document.querySelector('#to-options [data-station-id="4"]'),
+      ).display,
+    ).toBe("none");
     expect(document.querySelector("#to-trigger").disabled).toBe(false);
   });
 

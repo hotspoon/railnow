@@ -1,6 +1,7 @@
 .station-option-list { max-height: 14rem; overflow-y: auto; }
 .station-trigger, .station-options button { text-align: left; }
 .station-options button { display: flex; width: 100%; justify-content: space-between; align-items: center; border-radius: .5rem; padding: .625rem .75rem; }
+.station-options button[hidden] { display: none; }
 .station-options button:hover, .station-options button:focus-visible { background: #eff6ff; outline: 0; }
 .station-options span { color: #64748b; font-size: .75rem; }
 .station-trigger:disabled, #swap-route:disabled, #search-submit:disabled { cursor: wait; opacity: .6; }

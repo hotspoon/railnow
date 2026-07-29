@@ -11,6 +11,10 @@
   text-align: left;
 }
 
+.station-options button[hidden] {
+  display: none;
+}
+
 .station-options button:hover,
 .station-options button:focus-visible {
   background: #eff6ff;
