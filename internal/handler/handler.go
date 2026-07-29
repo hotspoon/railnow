@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
@@ -97,6 +98,20 @@ func (h *Handler) Destinations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render(w, r, components.DestinationSelect(destinations, 0))
+}
+func (h *Handler) DestinationOptions(w http.ResponseWriter, r *http.Request) {
+	from, e := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
+	if e != nil {
+		http.Error(w, "Invalid origin", http.StatusBadRequest)
+		return
+	}
+	destinations, e := h.service.Destinations(r.Context(), from)
+	if e != nil {
+		http.Error(w, "Could not load destinations", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(destinations)
 }
 func (h *Handler) Train(w http.ResponseWriter, r *http.Request) {
 	id, e := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)

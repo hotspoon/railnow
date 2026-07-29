@@ -1,5 +1,6 @@
 const SAVED_KEY = 'railnow.savedRoutes';
 const RECENT_KEY = 'railnow.recentStations';
+let allowedDestinations = null;
 
 function jakartaTime() {
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
@@ -30,6 +31,22 @@ function setStation(target, id, name) {
   document.querySelector(`#${target}-options`).hidden = true;
   const recents = read(RECENT_KEY).filter((station) => station.id !== id);
   write(RECENT_KEY, [{ id, name }, ...recents].slice(0, 5));
+	if (target === 'from') updateDestinationOptions(id);
+}
+async function updateDestinationOptions(from) {
+	try {
+		const response = await fetch(`/stations/destination-options?from=${encodeURIComponent(from)}`);
+		if (!response.ok) return;
+		const destinations = await response.json();
+		const allowed = new Set(destinations.map((station) => String(station.ID)));
+		allowedDestinations = allowed;
+		document.querySelectorAll('#to-options [data-station-id]').forEach((option) => { option.hidden = !allowed.has(option.dataset.stationId); });
+		const selected = document.querySelector('#to');
+		if (!allowed.has(selected.value)) {
+			const first = destinations[0];
+			if (first) setStation('to', String(first.ID), first.Name);
+		}
+	} catch { /* Keep the currently rendered options when offline. */ }
 }
 function initStations() {
 	const normalize = (value) => value.toLocaleLowerCase().replace(/[^a-z0-9]/g, '');
@@ -42,6 +59,7 @@ function initStations() {
 			const panel = document.querySelector(`#${target}-options`); panel.hidden = !panel.hidden;
 			if (!panel.hidden) document.querySelector(`#${target}-query`).focus();
 		});
+		if (target === 'from' && selected) updateDestinationOptions(selected);
 	});
   document.querySelectorAll('.station-query').forEach((input) => {
     const target = input.dataset.target;
@@ -50,7 +68,8 @@ function initStations() {
       const options = document.querySelector(`#${target}-options`);
       document.querySelectorAll(`#${target}-options [data-station-id]`).forEach((option) => {
 		const searchable = normalize(`${option.dataset.stationName} ${option.textContent}`);
-		option.hidden = term.length >= 2 && !searchable.includes(term);
+		const notAllowed = target === 'to' && allowedDestinations && !allowedDestinations.has(option.dataset.stationId);
+		option.hidden = notAllowed || (term.length >= 2 && !searchable.includes(term));
       });
 	  options.hidden = false;
     });

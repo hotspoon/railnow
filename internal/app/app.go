@@ -20,6 +20,7 @@ func NewHandler(db *sql.DB) *chi.Mux {
 	r.Get("/search", h.Search)
 	r.Get("/schedule", h.Schedule)
 	r.Get("/stations/destinations", h.Destinations)
+	r.Get("/stations/destination-options", h.DestinationOptions)
 	r.Get("/train/{id}", h.Train)
 	r.Get("/saved", h.Saved)
 	return r
