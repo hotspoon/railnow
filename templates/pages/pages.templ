@@ -17,7 +17,7 @@ templ SearchHome(stations []models.Station, fromID, toID int64, page models.Sear
 }
 
 templ homeContent(stations []models.Station, fromID, toID int64, info models.ScheduleInfo, hasResults bool, page models.SearchPage) {
-	<header class="mb-7">
+	<header class="storybook-hero mb-7">
 		<div class="flex items-center justify-between">
 			<a href="/" class="text-xl font-black tracking-tight">🚆 RailNow</a>
 			<span id="live-clock" class="text-sm font-medium text-slate-500"></span>
@@ -42,7 +42,7 @@ templ scheduleNotice(info models.ScheduleInfo, classes string) {
 
 templ SearchResult(page models.SearchPage) {
 	<section id="schedule-results" class="animate-in">
-		<div class="mb-7 flex items-center justify-between">
+		<div class="route-results-header mb-7">
 			@components.Route(page.From.Name, page.To.Name)
 			@components.FavoriteButton(page.From.ID, page.To.ID, false)
 		</div>

@@ -29,8 +29,7 @@
   color: #17213e;
   font-family: "Avenir Next Rounded", "Nunito", ui-rounded, system-ui, sans-serif;
 }
-.winter-storybook main { position: relative; isolation: isolate; }
-.winter-storybook main > * { position: relative; z-index: 1; }
+.winter-storybook main { position: relative; }
 .winter-storybook main::before {
   content: "✦  ·  ✦";
   position: absolute;
@@ -42,15 +41,21 @@
 	pointer-events: none;
 	z-index: 0;
 }
-.winter-storybook main::after {
+.storybook-hero {
+	position: relative;
+	min-height: 12.5rem;
+	padding-right: 8.5rem;
+}
+.storybook-hero > * { position: relative; z-index: 1; }
+.storybook-hero::after {
 	content: "";
 	position: absolute;
-	top: -.8rem;
-	right: -.75rem;
-	width: 14rem;
-	height: 19rem;
+	top: -.4rem;
+	right: -1rem;
+	width: 11.5rem;
+	height: 15.5rem;
 	background: url("/images/snow-white-2.png") top right / contain no-repeat;
-	opacity: .4;
+	opacity: .42;
 	pointer-events: none;
 	z-index: 0;
 }
@@ -86,7 +91,10 @@
 .winter-storybook .station-query { color: #17213e; }
 .winter-storybook .station-query { border: 1px solid #d5e3f5; background: #f7fbff; }
 .winter-storybook .line-badge { box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.route-results-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.route-results-header .save-route { margin-left: auto; white-space: nowrap; }
 .storybook-select-card {
+	overflow: hidden;
   background-image:
     linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.94) 56%, rgba(255,255,255,.25) 100%),
     url("/images/snow-white.png") !important;
@@ -100,5 +108,7 @@
 .storybook-select-card label { position: relative; z-index: 1; }
 @media (max-width: 380px) {
   .storybook-select-card { background-position: center, right -2.5rem bottom -2rem; background-size: cover, 10rem auto; }
-	.winter-storybook main::after { width: 11.5rem; height: 15.5rem; right: -1rem; opacity: .34; }
+	.storybook-hero { min-height: 11.5rem; padding-right: 7rem; }
+	.storybook-hero::after { width: 9.5rem; height: 13rem; right: -1.25rem; opacity: .32; }
+	.route-results-header .route-summary { width: 100%; }
 }
