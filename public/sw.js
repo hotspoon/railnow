@@ -1,7 +1,15 @@
-const CACHE = 'railnow-v2';
+const CACHE = 'railnow-v3';
+const APP_SHELL = [
+  '/',
+  '/css/output.css',
+  '/css/station-select.css',
+  '/js/htmx.min.js',
+  '/js/app.js',
+  '/images/snow-white-2-600.png',
+];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['/css/output.css', '/js/app.js'])));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
@@ -10,13 +18,26 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Schedules must be fresh when online. Cached pages are used only offline.
+// Timetable pages remain network-first. Only the application shell and image
+// assets are cached, so route results never accumulate in browser storage.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(fetch(event.request).then((response) => {
-    if (response.ok && new URL(event.request.url).origin === self.location.origin) {
-      caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
-    }
-    return response;
-  }).catch(() => caches.match(event.request).then((cached) => cached || caches.match('/'))));
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  const isAsset = ['/css/', '/js/', '/images/', '/icons/'].some((path) => url.pathname.startsWith(path));
+  if (isAsset) {
+    event.respondWith(caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+        return response;
+      });
+    }));
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).catch(() => caches.match('/')));
+  }
 });

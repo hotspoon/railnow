@@ -20,7 +20,7 @@ task test
 docker build -t railnow . && docker run -p 8080:8080 railnow
 ```
 
-`task css` downloads the pinned Tailwind CLI on demand with `npx`; no large binary is stored in this repository.
+Run `npm install` once before `task css`. The pinned Tailwind CLI is installed as a development dependency, so CSS builds are reproducible on Node 18+ and do not rely on a transient `npx` download.
 
 ## Importing KRL schedules
 

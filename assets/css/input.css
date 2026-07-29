@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 .station-options button {
   display: flex;
@@ -16,13 +18,9 @@
 }
 
 .station-options span { color: #64748b; font-size: 0.75rem; }
-@source "../../templates";
-@source "../../public/js";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-@utility animate-in {
-  animation: fade-in 180ms ease-out;
+@layer utilities {
+  .animate-in { animation: fade-in 180ms ease-out; }
 }
 
 @keyframes fade-in {

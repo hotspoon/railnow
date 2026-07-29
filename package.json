@@ -1,0 +1,11 @@
+{
+	"scripts": {
+		"css": "tailwindcss -i assets/css/input.css -o public/css/output.css --minify"
+	},
+	"devDependencies": {
+    "tailwindcss": "3.4.17"
+	},
+	"engines": {
+		"node": ">=18"
+	}
+}

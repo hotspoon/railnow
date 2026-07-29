@@ -35,9 +35,9 @@ tasks:
       - templ generate
 
   css:
-    desc: Rebuild the Tailwind stylesheet
+    desc: Rebuild the pinned Tailwind stylesheet
     cmds:
-      - npx --yes @tailwindcss/cli@4.3.3 -i assets/css/input.css -o public/css/output.css --minify
+      - npm run css
 
   sqlc:
     desc: Generate typed Go query code from SQL queries

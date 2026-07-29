@@ -4,6 +4,7 @@
 .station-options button:hover, .station-options button:focus-visible { background: #eff6ff; outline: 0; }
 .station-options span { color: #64748b; font-size: .75rem; }
 .station-trigger:disabled, #swap-route:disabled, #search-submit:disabled { cursor: wait; opacity: .6; }
+.search-submit-button { display: block; margin-top: 1.25rem !important; }
 #swap-route { cursor: pointer; transition: color .15s ease, transform .2s ease; }
 #swap-route:not(:disabled):hover { color: #1d4ed8; }
 .station-trigger.is-swapping { animation: station-swap .28s ease; }
@@ -54,7 +55,7 @@
 	right: -1rem;
 	width: 11.5rem;
 	height: 15.5rem;
-	background: url("/images/snow-white-2.png") top right / contain no-repeat;
+	background: url("/images/snow-white-2-600.png") top right / contain no-repeat;
 	opacity: .42;
 	pointer-events: none;
 	z-index: 0;
@@ -97,7 +98,7 @@
 	overflow: hidden;
   background-image:
     linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.94) 56%, rgba(255,255,255,.25) 100%),
-    url("/images/snow-white.png") !important;
+    url("/images/snow-white-2-600.png") !important;
   background-position: center, right -1.5rem bottom -2.5rem;
   background-repeat: no-repeat;
   background-size: cover, 12.5rem auto;
