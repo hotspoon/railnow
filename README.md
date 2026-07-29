@@ -22,6 +22,16 @@ docker build -t railnow . && docker run -p 8080:8080 railnow
 
 `task css` downloads the pinned Tailwind CLI on demand with `npx`; no large binary is stored in this repository.
 
+## Importing KRL schedules
+
+The app starts with a small demo schedule. To replace it with the public Jabodetabek schedule dataset from [dedewanta/scraping-krl-jabodetabek](https://github.com/dedewanta/scraping-krl-jabodetabek), run:
+
+```sh
+task import:krl
+```
+
+This downloads CSV files into the ignored `.cache/` directory and replaces the local SQLite data. The importer preserves each train's ordered stops based on its departure times. The source does not provide per-stop arrival times, so RailNow uses the departure time for both arrival and departure until a more detailed source is available.
+
 Install the Task runner once if it is not available:
 
 ```sh

@@ -1,58 +1,116 @@
 package pages
 
 import (
- "fmt"
- templcore "github.com/a-h/templ"
- "github.com/hotspoon/railnow/internal/models"
- "github.com/hotspoon/railnow/templates/components"
- "github.com/hotspoon/railnow/templates/layout"
+	"fmt"
+	templcore "github.com/a-h/templ"
+	"github.com/hotspoon/railnow/internal/models"
+	"github.com/hotspoon/railnow/templates/components"
+	"github.com/hotspoon/railnow/templates/layout"
 )
 
-templ Home(stations []models.Station, favorites, recents []models.Favorite) { @layout.Page("Your next train", homeContent(stations, favorites, recents)) }
-templ homeContent(stations []models.Station, favorites, recents []models.Favorite) {
- <header class="mb-7"><div class="flex items-center justify-between"><a href="/" class="text-xl font-black tracking-tight">🚆 RailNow</a><span id="live-clock" class="text-sm font-medium text-slate-500"></span></div><h1 class="mt-7 text-4xl font-black tracking-tight">Find your<br/><span class="text-blue-600">next train.</span></h1><p class="mt-2 text-slate-500">Live commuter schedules, without the fuss.</p></header>
- @components.SearchForm(stations, 1, 5)
- <section id="schedule-results" class="mt-6"></section>
- if len(favorites) > 0 {
-  <section id="favorites" class="mt-8"><h2 class="mb-3 text-lg font-bold">Your routes</h2><div class="grid gap-3">
-   for _, f := range favorites {
-    <a href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", f.FromID, f.ToID)) } class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"><span class="text-yellow-500">★</span><span class="ml-2 text-xs font-bold uppercase tracking-wider text-slate-400">{ f.Label }</span><div class="mt-2">@components.Route(f.From, f.To)</div></a>
-   }
-  </div></section>
- }
- if len(recents) > 0 {
-  <section class="mt-8"><h2 class="mb-3 text-lg font-bold">Recent</h2><div class="space-y-2">
-   for _, r := range recents {
-    <a class="block text-sm text-slate-500" href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", r.FromID, r.ToID)) }>{ r.From } → { r.To }</a>
-   }
-  </div></section>
- }
+templ Home(stations, destinations []models.Station, fromID, toID int64, favorites, recents []models.Favorite, info models.ScheduleInfo) {
+	@layout.Page("Your next train", homeContent(stations, destinations, fromID, toID, favorites, recents, info))
 }
+
+templ homeContent(stations, destinations []models.Station, fromID, toID int64, favorites, recents []models.Favorite, info models.ScheduleInfo) {
+	<header class="mb-7">
+		<div class="flex items-center justify-between">
+			<a href="/" class="text-xl font-black tracking-tight">🚆 RailNow</a>
+			<span id="live-clock" class="text-sm font-medium text-slate-500"></span>
+		</div>
+		<h1 class="mt-7 text-4xl font-black tracking-tight">Find your<br/><span class="text-blue-600">next train.</span></h1>
+		<p class="mt-2 text-slate-500">Fast commuter schedules, without the fuss.</p>
+	</header>
+	@components.SearchForm(stations, destinations, fromID, toID)
+	@scheduleNotice(info, "mt-3")
+	<section id="schedule-results" class="mt-6"></section>
+	if len(favorites) > 0 {
+		<section id="favorites" class="mt-8">
+			<h2 class="mb-3 text-lg font-bold">Your routes</h2>
+			<div class="grid gap-3">
+				for _, f := range favorites {
+					<a href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", f.FromID, f.ToID)) } class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+						<span class="text-yellow-500">★</span><span class="ml-2 text-xs font-bold uppercase tracking-wider text-slate-400">{ f.Label }</span>
+						<div class="mt-2">
+							@components.Route(f.From, f.To)
+						</div>
+					</a>
+				}
+			</div>
+		</section>
+	}
+	if len(recents) > 0 {
+		<section class="mt-8">
+			<h2 class="mb-3 text-lg font-bold">Recent</h2>
+			<div class="space-y-2">
+				for _, r := range recents {
+					<a class="block text-sm text-slate-500" href={ templcore.SafeURL(fmt.Sprintf("/search?from=%d&to=%d", r.FromID, r.ToID)) }>{ r.From } → { r.To }</a>
+				}
+			</div>
+		</section>
+	}
+}
+
+templ scheduleNotice(info models.ScheduleInfo, classes string) {
+	<p class={ classes + " text-xs text-slate-400" }>
+		Jadwal acuan
+		if info.SnapshotDate != "" {
+			<span>· { info.SnapshotDate }</span>
+		}
+	</p>
+}
+
 templ SearchResult(page models.SearchPage) {
- <section id="schedule-results" class="animate-in" hx-get={ templcore.SafeURL(fmt.Sprintf("/schedule?from=%d&to=%d", page.From.ID, page.To.ID)) } hx-trigger="every 60s" hx-swap="outerHTML">
-  <div class="mb-4 flex items-center justify-between">@components.Route(page.From.Name, page.To.Name) @components.FavoriteButton(page.From.ID, page.To.ID, page.IsFavorite)</div>
-  if len(page.Departures) == 0 {
-   <div class="rounded-3xl bg-white p-6 text-center text-slate-500 shadow-sm">No scheduled trains on this route yet.</div>
-  } else {
-   @nextCard(page.Departures[0])
-   <h2 class="mb-3 mt-7 text-lg font-bold">Upcoming</h2>
-   <div class="space-y-3">
-    for _, d := range page.Departures[1:] {
-     @trainCard(d)
-    }
-   </div>
-  }
- </section>
+	<section id="schedule-results" class="animate-in" hx-get={ templcore.SafeURL(fmt.Sprintf("/schedule?from=%d&to=%d", page.From.ID, page.To.ID)) } hx-trigger="every 60s" hx-swap="outerHTML">
+		<div class="mb-2 flex items-center justify-between">
+			@components.Route(page.From.Name, page.To.Name)
+			@components.FavoriteButton(page.From.ID, page.To.ID, page.IsFavorite)
+		</div>
+		@scheduleNotice(page.ScheduleInfo, "mb-4")
+		if len(page.Departures) == 0 {
+			<div class="rounded-3xl bg-white p-6 text-center text-slate-500 shadow-sm">No scheduled trains on this route yet.</div>
+		} else {
+			@nextCard(page.Departures[0])
+			<h2 class="mb-3 mt-7 text-lg font-bold">Upcoming</h2>
+			<div class="space-y-3">
+				for _, d := range page.Departures[1:] {
+					@trainCard(d)
+				}
+			</div>
+		}
+	</section>
 }
-templ SearchPage(page models.SearchPage) { @layout.Page("Schedule", SearchResult(page)) }
-templ nextCard(d models.Departure) { <article class="rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25"><div class="flex items-start justify-between"><p class="text-xs font-bold tracking-widest text-blue-100">NEXT TRAIN</p><span class="rounded-full bg-white/15 px-2 py-1 text-xs">● On time</span></div><div class="mt-5 flex items-end justify-between"><time class="text-5xl font-black tracking-tight">{ d.Departure }</time><div class="text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="text-2xl" data-countdown={ d.Departure }>--:--</strong></div></div><div class="mt-5 flex justify-between border-t border-white/20 pt-4 text-sm"><span>{ d.Route }</span><span>{ fmt.Sprintf("%d min", d.Duration) }</span></div></article> }
-templ trainCard(d models.Departure) { <a href={ templcore.SafeURL(fmt.Sprintf("/train/%d", d.TrainID)) } class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800"><time class="text-2xl font-black">{ d.Departure }</time><span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-sm font-semibold text-blue-600">Details ›</span></a> }
-templ TrainDetail(stops []models.Stop) { @layout.Page("Train details", trainContent(stops)) }
-templ trainContent(stops []models.Stop) {
- <a href="/" class="text-sm font-bold text-blue-600">‹ Back</a><h1 class="mt-6 text-3xl font-black">Train stops</h1><p class="mt-1 text-slate-500">All scheduled station times</p>
- <div class="mt-7 space-y-0">
-  for _, s := range stops {
-   <div class="flex gap-4"><div class="flex flex-col items-center"><span class="mt-1 h-3 w-3 rounded-full bg-blue-600"></span><span class="h-12 w-px bg-slate-200"></span></div><div class="flex-1 pb-6"><div class="flex justify-between"><strong>{ s.Name }</strong><time>{ s.Departure }</time></div><p class="mt-1 text-xs text-slate-400">Stop { fmt.Sprintf("%d", s.Sequence) }</p></div></div>
-  }
- </div>
+
+templ SearchPage(page models.SearchPage) {
+	@layout.Page("Schedule", SearchResult(page))
+}
+
+templ nextCard(d models.Departure) {
+	<article class="rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25">
+		<div class="flex items-start justify-between"><p class="text-xs font-bold tracking-widest text-blue-100">NEXT TRAIN</p><span class="rounded-full bg-white/15 px-2 py-1 text-xs">◷ Scheduled</span></div>
+		<div class="mt-5 flex items-end justify-between"><time class="text-5xl font-black tracking-tight">{ d.Departure }</time><div class="text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="text-2xl" data-countdown={ d.Departure } data-next-day={ fmt.Sprintf("%t", d.NextDay) }>--:--</strong></div></div>
+		<div class="mt-5 flex justify-between border-t border-white/20 pt-4 text-sm"><span>{ d.Route }</span><span>{ fmt.Sprintf("%d min", d.Duration) }</span></div>
+		if d.NextDay {
+			<p class="mt-2 text-xs text-blue-100">First available service tomorrow</p>
+		}
+	</article>
+}
+
+templ trainCard(d models.Departure) {
+	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d", d.TrainID)) } class="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800"><time class="text-2xl font-black">{ d.Departure }</time><span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-sm font-semibold text-blue-600">Details ›</span></a>
+}
+
+templ TrainDetail(stops []models.Stop, info models.ScheduleInfo) {
+	@layout.Page("Train details", trainContent(stops, info))
+}
+
+templ trainContent(stops []models.Stop, info models.ScheduleInfo) {
+	<a href="/" class="text-sm font-bold text-blue-600">‹ Back</a>
+	<h1 class="mt-6 text-3xl font-black">Train stops</h1>
+	<p class="mt-1 text-slate-500">Waktu keberangkatan dari setiap stasiun</p>@scheduleNotice(info, "mt-3")
+	<div class="mt-7 space-y-0">
+		for _, s := range stops {
+			<div class="flex gap-4"><div class="flex flex-col items-center"><span class="mt-1 h-3 w-3 rounded-full bg-blue-600"></span><span class="h-12 w-px bg-slate-200"></span></div><div class="flex-1 pb-6"><div class="flex justify-between"><strong>{ s.Name }</strong><time>{ s.Departure }</time></div><p class="mt-1 text-xs text-slate-400">Stop { fmt.Sprintf("%d", s.Sequence) }</p></div></div>
+		}
+	</div>
 }

@@ -6,6 +6,12 @@ tasks:
     cmds:
       - task --list
 
+  dev:
+    desc: Start development server with Air (hot reload)
+    deps: [templ]
+    cmds:
+      - air
+
   run:
     desc: Start RailNow locally at http://localhost:8080
     deps: [templ]
@@ -37,6 +43,14 @@ tasks:
     desc: Generate typed Go query code from SQL queries
     cmds:
       - sqlc generate
+
+  import:krl:
+    desc: Download and import the public KRL schedule dataset into local SQLite (replaces local data)
+    cmds:
+      - mkdir -p .cache/krl
+      - curl -fsSL https://raw.githubusercontent.com/dedewanta/scraping-krl-jabodetabek/master/commuter_line_schedule.csv -o .cache/krl/commuter_line_schedule.csv
+      - curl -fsSL https://raw.githubusercontent.com/dedewanta/scraping-krl-jabodetabek/master/dim_station.csv -o .cache/krl/dim_station.csv
+      - go run ./cmd/importer --input .cache/krl/commuter_line_schedule.csv --replace
 
   migrate-up:
     desc: Apply SQLite migrations manually

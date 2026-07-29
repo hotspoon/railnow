@@ -29,14 +29,14 @@ func Page(title string, content templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#0066ff\"><meta name=\"description\" content=\"Fast commuter train schedules\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"stylesheet\" href=\"/public/css/output.css\"><script src=\"https://unpkg.com/htmx.org@2.0.4\" defer></script><script src=\"/public/js/app.js\" defer></script><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#0066ff\"><meta name=\"description\" content=\"Fast commuter train schedules\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"icon\" href=\"/public/icons/favicon.ico\" sizes=\"any\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/public/icons/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/public/icons/favicon-16x16.png\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/public/icons/apple-touch-icon.png\"><link rel=\"stylesheet\" href=\"/public/css/output.css\"><script src=\"/public/js/htmx.min.js\" defer></script><script src=\"/public/js/app.js\" defer></script><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout/layout.templ`, Line: 8, Col: 124}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout/layout.templ`, Line: 19, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -50,7 +50,7 @@ func Page(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><nav class=\"fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90\"><div class=\"mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500\"><a class=\"text-blue-600\" href=\"/\">⌂<span class=\"ml-1\">Home</span></a><a href=\"/#favorites\">☆<span class=\"ml-1\">Saved</span></a><button aria-label=\"Toggle dark mode\" onclick=\"document.documentElement.classList.toggle('dark')\">◐ Theme</button></div></nav></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><nav class=\"fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90\"><div class=\"mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500\"><a class=\"text-blue-600\" href=\"/\">⌂<span class=\"ml-1\">Home</span></a> <a href=\"/#favorites\">☆<span class=\"ml-1\">Saved</span></a> <button aria-label=\"Toggle dark mode\" onclick=\"document.documentElement.classList.toggle('dark')\">◐ Theme</button></div></nav></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

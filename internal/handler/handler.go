@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
+	"github.com/hotspoon/railnow/internal/models"
 	"github.com/hotspoon/railnow/internal/service"
 	"github.com/hotspoon/railnow/templates/components"
 	"github.com/hotspoon/railnow/templates/pages"
@@ -26,12 +27,27 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load stations", 500)
 		return
 	}
-	fav, recent, e := h.service.Home(r.Context())
+	fromID := stationIDByCode(stations, "MRI")
+	toID := stationIDByCode(stations, "BOO")
+	destinations, e := h.service.Destinations(r.Context(), fromID)
+	if e != nil {
+		http.Error(w, "Could not load destinations", 500)
+		return
+	}
+	fav, recent, info, e := h.service.Home(r.Context())
 	if e != nil {
 		http.Error(w, "Could not load routes", 500)
 		return
 	}
-	render(w, r, pages.Home(stations, fav, recent))
+	render(w, r, pages.Home(stations, destinations, fromID, toID, fav, recent, info))
+}
+func stationIDByCode(stations []models.Station, code string) int64 {
+	for _, station := range stations {
+		if station.Code == code {
+			return station.ID
+		}
+	}
+	return 0
 }
 func ids(r *http.Request) (int64, int64, error) {
 	from, e := strconv.ParseInt(r.FormValue("from"), 10, 64)
@@ -74,6 +90,19 @@ func (h *Handler) Schedule(w http.ResponseWriter, r *http.Request) {
 	}
 	render(w, r, pages.SearchResult(p))
 }
+func (h *Handler) Destinations(w http.ResponseWriter, r *http.Request) {
+	from, e := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
+	if e != nil {
+		http.Error(w, "Invalid origin", http.StatusBadRequest)
+		return
+	}
+	destinations, e := h.service.Destinations(r.Context(), from)
+	if e != nil {
+		http.Error(w, "Could not load destinations", http.StatusInternalServerError)
+		return
+	}
+	render(w, r, components.DestinationSelect(destinations, 0))
+}
 func (h *Handler) Train(w http.ResponseWriter, r *http.Request) {
 	id, e := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if e != nil {
@@ -85,7 +114,12 @@ func (h *Handler) Train(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	render(w, r, pages.TrainDetail(stops))
+	info, e := h.service.ScheduleInfo(r.Context())
+	if e != nil {
+		http.Error(w, "Could not load schedule metadata", 500)
+		return
+	}
+	render(w, r, pages.TrainDetail(stops, info))
 }
 func (h *Handler) Favorite(w http.ResponseWriter, r *http.Request) {
 	if e := r.ParseForm(); e != nil {

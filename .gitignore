@@ -9,6 +9,7 @@ tmp/
 # Frontend tool caches
 node_modules/
 .task/
+.cache/
 
 # OS files
 .DS_Store
