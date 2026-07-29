@@ -18,37 +18,64 @@ function scheduleDestinationOptions(from) {
   destinationTimer = window.setTimeout(() => updateDestinationOptions(from), 180);
 }
 
-function jakartaTime() {
+function jakartaTime(includeSeconds) {
+  const options = {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  };
+  if (includeSeconds) options.second = "2-digit";
   try {
-    return new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Asia/Jakarta",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hourCycle: "h23",
-    });
+    return new Intl.DateTimeFormat("en-GB", options);
   } catch (error) {
-    return new Intl.DateTimeFormat("en-GB", {
+    const fallback = {
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
-    });
+      hourCycle: "h23",
+    };
+    if (includeSeconds) fallback.second = "2-digit";
+    return new Intl.DateTimeFormat("en-GB", fallback);
   }
 }
 function jakartaSeconds() {
-  const parts = jakartaTime().formatToParts();
+  const parts = jakartaTime(true).formatToParts();
   const value = (type) => {
     const part = parts.find((candidate) => candidate.type === type);
     return Number(part ? part.value : 0);
   };
   return value("hour") * 3600 + value("minute") * 60 + value("second");
 }
+function parseClock(value) {
+  const match = String(value || "")
+    .trim()
+    .match(/^(\d{1,2}):([0-5]\d)(?::[0-5]\d)?$/);
+  if (!match) return null;
+  const hour = Number(match[1]);
+  if (hour > 47) return null;
+  return {
+    hour,
+    minute: Number(match[2]),
+    label: `${String(hour).padStart(2, "0")}:${match[2]}`,
+  };
+}
 function tick() {
   const clock = document.querySelector("#live-clock");
-  if (clock) clock.textContent = `${jakartaTime().format()} WIB`;
+  if (clock) clock.textContent = `${jakartaTime(false).format()} WIB`;
+  document.querySelectorAll("[data-clock-time]").forEach((el) => {
+    const parsed = parseClock(el.textContent);
+    if (parsed) el.textContent = parsed.label;
+  });
   document.querySelectorAll("[data-countdown]").forEach((el) => {
-    const [h, m] = el.dataset.countdown.split(":").map(Number);
-    let diff = h * 3600 + m * 60 - jakartaSeconds();
+    const parsed = parseClock(el.dataset.countdown);
+    if (!parsed) {
+      el.textContent = "—";
+      return;
+    }
+    let diff =
+      (parsed.hour % 24) * 3600 +
+      parsed.minute * 60 -
+      jakartaSeconds();
     if (el.dataset.nextDay === "true" || diff < 0) diff += 24 * 3600;
     const hours = Math.floor(diff / 3600);
     const minutes = Math.floor((diff % 3600) / 60);

@@ -27,7 +27,9 @@ function page() {
       <button id="search-submit" data-label="Find next train">Find next train</button>
     </form>
     <div id="offline-banner" class="hidden"></div>
-    <span id="live-clock"></span>`;
+    <span id="live-clock"></span>
+    <time data-clock-time>05:13:30</time>
+    <strong data-countdown="05:13:30" data-next-day="false">--:--</strong>`;
 }
 
 function response(stations) {
@@ -67,6 +69,11 @@ describe("station picker", () => {
         document.querySelector('#from-options [data-station-id="1"]'),
       ).display,
     ).toBe("none");
+  });
+
+  it("normalizes timetable seconds for compact mobile cards", () => {
+    expect(document.querySelector("[data-clock-time]").textContent).toBe("05:13");
+    expect(document.querySelector("[data-countdown]").textContent).not.toContain(":");
   });
 
   it("only exposes direct destinations after choosing an origin", async () => {

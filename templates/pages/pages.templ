@@ -18,12 +18,12 @@ templ SearchHome(stations []models.Station, fromID, toID int64, page models.Sear
 
 templ homeContent(stations []models.Station, fromID, toID int64, info models.ScheduleInfo, hasResults bool, page models.SearchPage) {
 	<header class="storybook-hero mb-7">
-		<div class="flex items-center justify-between">
+		<div class="hero-brand-row flex items-center justify-between">
 			<a href="/" class="text-xl font-black tracking-tight">🚆 RailNow</a>
 			<span id="live-clock" class="text-sm font-medium text-slate-500"></span>
 		</div>
-		<h1 class="mt-7 text-4xl font-black tracking-tight">Cari jadwal <br/><span class="text-blue-600">KRL mu</span></h1>
-		<p class="mt-2 text-slate-500">Fast commuter schedules, without the fuss.</p>
+		<h1 class="hero-title mt-7 text-4xl font-black tracking-tight">Cari jadwal <br/><span class="text-blue-600">KRL mu</span></h1>
+		<p class="hero-subtitle mt-2 text-slate-500">Fast commuter schedules, without the fuss.</p>
 	</header>
 	@components.SearchForm(stations, fromID, toID)
 	@scheduleNotice(info, "mt-3")
@@ -36,7 +36,7 @@ templ homeContent(stations []models.Station, fromID, toID int64, info models.Sch
 
 templ scheduleNotice(info models.ScheduleInfo, classes string) {
 	if info.Stale {
-		<p class={ classes + " text-sm font-medium text-amber-700" } role="status">Schedule data may be out of date.</p>
+		<p class={ classes + " schedule-notice text-sm font-medium text-amber-700" } role="status">Schedule data may be out of date.</p>
 	}
 }
 
@@ -52,10 +52,20 @@ templ SearchResult(page models.SearchPage) {
 			@nextCard(page.Departures[0], page.To.Name, page.From.ID, page.To.ID)
 			<h2 class="mb-3 mt-7 text-lg font-bold">Upcoming</h2>
 			<div class="space-y-3">
-				for _, d := range page.Departures[1:] {
+				for _, d := range page.Departures[1:min(len(page.Departures), 7)] {
 				@trainCard(d, page.From.ID, page.To.ID)
 				}
 			</div>
+			if len(page.Departures) > 7 {
+				<details class="upcoming-more mt-3">
+					<summary>{ fmt.Sprintf("Show %d more departures", len(page.Departures)-7) }</summary>
+					<div class="mt-3 space-y-3">
+						for _, d := range page.Departures[7:] {
+							@trainCard(d, page.From.ID, page.To.ID)
+						}
+					</div>
+				</details>
+			}
 		}
 		if len(page.Transfers) > 0 {
 			<h2 class="mb-3 mt-7 text-lg font-bold">Transfer options</h2>
@@ -71,10 +81,10 @@ templ SearchPage(page models.SearchPage) {
 }
 
 templ nextCard(d models.Departure, destination string, from, to int64) {
-	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="train-detail-link block rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25 transition active:scale-[.99]">
+	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="next-train-card train-detail-link block rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25 transition active:scale-[.99]">
 		<div class="flex items-start justify-between"><p class="text-xs font-bold tracking-widest text-blue-100">NEXT TRAIN</p><span class="rounded-full bg-white/15 px-2 py-1 text-xs">Scheduled</span></div>
-		<div class="mt-5 flex items-end justify-between gap-4"><div><time class="text-5xl font-black tracking-tight">{ d.Departure }</time><p class="mt-2 text-xs font-bold uppercase tracking-widest text-blue-100">Destination</p><h2 class="mt-1 text-2xl font-black">{ destination }</h2></div><div class="text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="text-2xl" data-countdown={ d.Departure } data-next-day={ fmt.Sprintf("%t", d.NextDay) }>--:--</strong></div></div>
-		<div class="mt-5 flex items-center justify-between border-t border-white/20 pt-4"><span class="rounded-full bg-white/15 px-2 py-1 text-xs font-bold">{ d.Route }</span><span class="text-sm font-bold">Train { d.Number } · { fmt.Sprintf("%d min", d.Duration) } ›</span></div>
+		<div class="next-train-primary mt-5 flex items-end justify-between gap-4"><div class="next-train-destination"><time class="departure-time text-5xl font-black tracking-tight" data-clock-time>{ d.Departure }</time><p class="mt-2 text-xs font-bold uppercase tracking-widest text-blue-100">Destination</p><h2 class="mt-1 text-2xl font-black">{ destination }</h2></div><div class="next-train-countdown text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="countdown-time text-2xl" data-countdown={ d.Departure } data-next-day={ fmt.Sprintf("%t", d.NextDay) }>--:--</strong></div></div>
+		<div class="next-train-footer mt-5 flex items-center justify-between border-t border-white/20 pt-4"><span class="train-route-pill rounded-full bg-white/15 px-2 py-1 text-xs font-bold">{ d.Route }</span><span class="train-meta text-sm font-bold">Train { d.Number } · { fmt.Sprintf("%d min", d.Duration) } ›</span></div>
 		if d.NextDay {
 			<p class="mt-2 text-xs text-blue-100">First available service tomorrow</p>
 		}
@@ -82,9 +92,9 @@ templ nextCard(d models.Departure, destination string, from, to int64) {
 }
 
 templ trainCard(d models.Departure, from, to int64) {
-	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="train-detail-link flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800">
-		<time class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">{ d.Departure }</time>
-		<div class="flex-1"><strong class="block text-sm text-slate-900 dark:text-slate-50">Train { d.Number }</strong><span class={ "compact-train-route line-badge " + lineBadgeClass(d.Route) }>{ d.Route }</span></div>
+	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="upcoming-train-card train-detail-link flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800">
+		<time class="text-2xl font-black tracking-tight text-slate-900 dark:text-white" data-clock-time>{ d.Departure }</time>
+		<div class="train-card-details flex-1"><strong class="block text-sm text-slate-900 dark:text-slate-50">Train { d.Number }</strong><span class={ "compact-train-route line-badge " + lineBadgeClass(d.Route) }>{ d.Route }</span></div>
 		<span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-lg font-bold text-blue-600">›</span>
 	</a>
 }
