@@ -1,4 +1,4 @@
-const CACHE = 'railnow-v9';
+const CACHE = 'railnow-v10';
 const APP_SHELL = [
   '/',
   '/css/output.css?v=20260730-7',
@@ -30,7 +30,14 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+        // Clone before returning the response. Cloning inside the asynchronous
+        // cache callback races with the browser consuming the response body.
+        if (response.ok) {
+          const cacheResponse = response.clone();
+          event.waitUntil(
+            caches.open(CACHE).then((cache) => cache.put(event.request, cacheResponse)),
+          );
+        }
         return response;
       });
     }));
