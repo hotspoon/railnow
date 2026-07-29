@@ -200,7 +200,7 @@ func SearchResult(page models.SearchPage) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<section id=\"schedule-results\" class=\"animate-in\"><div class=\"route-results-header mb-7\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<section id=\"schedule-results\" class=\"animate-in\"><div class=\"route-results-header my-5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -42,7 +42,7 @@ templ scheduleNotice(info models.ScheduleInfo, classes string) {
 
 templ SearchResult(page models.SearchPage) {
 	<section id="schedule-results" class="animate-in">
-		<div class="route-results-header mb-7">
+		<div class="route-results-header my-5">
 			@components.Route(page.From.Name, page.To.Name)
 			@components.FavoriteButton(page.From.ID, page.To.ID, false)
 		</div>
