@@ -1,7 +1,7 @@
 const CACHE = 'railnow-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['/public/css/output.css', '/public/js/app.js'])));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['/css/output.css', '/js/app.js'])));
   self.skipWaiting();
 });
 

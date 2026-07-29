@@ -56,3 +56,8 @@ tasks:
     desc: Apply SQLite migrations manually
     cmds:
       - goose -dir db/migrations sqlite3 data/railnow.db up
+
+  migrate:turso:
+    desc: Copy local SQLite data to TURSO_DATABASE_URL (requires TURSO_AUTH_TOKEN)
+    cmds:
+      - go run ./cmd/migrate-turso

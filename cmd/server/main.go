@@ -2,27 +2,17 @@ package main
 
 import (
 	"database/sql"
-	"github.com/go-chi/chi/v5"
-	"github.com/hotspoon/railnow/internal/handler"
-	"github.com/hotspoon/railnow/internal/repository"
-	"github.com/hotspoon/railnow/internal/service"
-	"github.com/pressly/goose/v3"
 	"log"
-	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
-	"path/filepath"
+
+	"github.com/hotspoon/railnow/internal/app"
+	"github.com/hotspoon/railnow/internal/database"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
-	dbPath := os.Getenv("DATABASE_URL")
-	if dbPath == "" {
-		dbPath = "data/railnow.db"
-	}
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
-		log.Fatal(err)
-	}
-	db, err := sql.Open("sqlite", dbPath)
+	db, err := database.OpenFromEnv("data/railnow.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,16 +26,10 @@ func main() {
 	if err := seed(db); err != nil {
 		log.Fatal(err)
 	}
-	s := service.New(repository.New(db))
-	h := handler.New(s)
-	r := chi.NewRouter()
-	r.Get("/", h.Home)
-	r.Get("/search", h.Search)
-	r.Get("/schedule", h.Schedule)
-	r.Get("/stations/destinations", h.Destinations)
-	r.Get("/train/{id}", h.Train)
-	r.Post("/favorite", h.Favorite)
-	r.Handle("/public/*", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+	r := app.NewHandler(db)
+	r.Handle("/css/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
+	r.Handle("/js/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
+	r.Handle("/icons/*", http.StripPrefix("/", http.FileServer(http.Dir("public"))))
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/icons/favicon.ico") })
 	r.Get("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/manifest.webmanifest") })
 	r.Get("/sw.js", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "public/sw.js") })

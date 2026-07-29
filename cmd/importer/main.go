@@ -14,8 +14,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hotspoon/railnow/internal/database"
 	"github.com/pressly/goose/v3"
-	_ "modernc.org/sqlite"
 )
 
 type station struct{ Code, Name string }
@@ -31,7 +31,7 @@ type train struct {
 func main() {
 	input := flag.String("input", "", "Path to commuter_line_schedule.csv")
 	stationsPath := flag.String("stations", "", "Path to dim_station.csv (defaults beside --input)")
-	database := flag.String("database", "data/railnow.db", "SQLite database path")
+	dbPath := flag.String("database", "data/railnow.db", "SQLite path or libsql:// Turso URL")
 	replace := flag.Bool("replace", false, "Replace all existing stations, schedules, searches, and favorites")
 	flag.Parse()
 	if *input == "" {
@@ -49,10 +49,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Dir(*database), 0o755); err != nil {
-		log.Fatal(err)
+	var db *sql.DB
+	if database.IsRemoteURL(*dbPath) {
+		db, err = database.OpenTurso(*dbPath, os.Getenv("TURSO_AUTH_TOKEN"))
+	} else {
+		db, err = database.OpenSQLite(*dbPath)
 	}
-	db, err := sql.Open("sqlite", *database)
 	if err != nil {
 		log.Fatal(err)
 	}

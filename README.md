@@ -1,6 +1,6 @@
 # RailNow
 
-Mobile-first commuter train schedule MVP built with Go, Chi, templ, HTMX, SQLite, Goose, and Tailwind CSS.
+Mobile-first commuter train schedule MVP built with Go, Chi, templ, HTMX, SQLite/Turso, Goose, and Tailwind CSS.
 
 ## Run locally
 
@@ -39,3 +39,35 @@ brew install go-task/tap/go-task
 ```
 
 Schedules are demo data. Change `data/seed.sql` for another timetable before first run, or delete only `data/railnow.db` to re-seed during local development.
+
+## Turso
+
+The app uses Turso automatically when both environment variables below are set; otherwise it continues to use local SQLite.
+
+```sh
+TURSO_DATABASE_URL=libsql://your-database-organization.turso.io
+TURSO_AUTH_TOKEN=your-token
+```
+
+Create a Turso database and token, then migrate the existing local database with:
+
+```sh
+turso db create railnow
+export TURSO_DATABASE_URL="$(turso db show --url railnow)"
+export TURSO_AUTH_TOKEN="$(turso db tokens create railnow)"
+task migrate:turso
+```
+
+`task migrate:turso` applies this repository's migrations to Turso first, then copies all RailNow tables. It refuses to overwrite a non-empty Turso database unless run with `go run ./cmd/migrate-turso --replace`. Deployments only need the two `TURSO_*` variables; do not set `DATABASE_URL` to the Turso URL.
+
+## Deploying to Vercel
+
+This repository is configured as a Go Vercel Function. The function connects directly to Turso and does not run migrations or import local SQLite data during a request.
+
+1. Push this repository to GitHub, then import it in Vercel (leave the project root as this repository).
+2. In **Settings → Environment Variables**, add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for Production. Add them to Preview too only if preview deployments should use the same database.
+3. Deploy. Vercel detects `api/index.go` as the Go Function and serves files in `public/` as static assets.
+
+For a CLI deployment, run `vercel`, follow the project-linking prompt, then run `vercel --prod`. Use the same two Turso environment variables in the Vercel dashboard; never commit `.env`.
+
+Vercel Functions should run in a region near the Turso database. Select that region in the Vercel project settings before production deployment.
