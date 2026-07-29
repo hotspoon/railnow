@@ -150,7 +150,7 @@ function initStations() {
   });
   document.querySelectorAll(".station-query").forEach((input) => {
     const target = input.dataset.target;
-    const filterOptions = debounce(() => {
+    const filterOptions = () => {
       const term = normalize(input.value);
       const options = document.querySelector(`#${target}-options`);
       document
@@ -167,7 +167,7 @@ function initStations() {
             notAllowed || (term.length >= 2 && !searchable.includes(term));
         });
       options.hidden = false;
-    }, 100);
+    };
     input.addEventListener("input", filterOptions);
   });
   document.addEventListener("click", (event) => {
