@@ -1,0 +1,44 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List available development commands
+    cmds:
+      - task --list
+
+  run:
+    desc: Start RailNow locally at http://localhost:8080
+    deps: [templ]
+    cmds:
+      - go run ./cmd/server
+
+  build:
+    desc: Compile the server
+    deps: [templ]
+    cmds:
+      - go build ./cmd/server
+
+  test:
+    desc: Run all Go tests
+    cmds:
+      - go test ./...
+
+  templ:
+    desc: Generate Go code from templ templates
+    cmds:
+      - templ generate
+
+  css:
+    desc: Rebuild the Tailwind stylesheet
+    cmds:
+      - npx --yes @tailwindcss/cli@4.3.3 -i assets/css/input.css -o public/css/output.css --minify
+
+  sqlc:
+    desc: Generate typed Go query code from SQL queries
+    cmds:
+      - sqlc generate
+
+  migrate-up:
+    desc: Apply SQLite migrations manually
+    cmds:
+      - goose -dir db/migrations sqlite3 data/railnow.db up

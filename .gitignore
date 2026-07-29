@@ -1,0 +1,14 @@
+# Local database and environment
+data/*.db
+.env
+
+# Build outputs
+railnow
+tmp/
+
+# Frontend tool caches
+node_modules/
+.task/
+
+# OS files
+.DS_Store

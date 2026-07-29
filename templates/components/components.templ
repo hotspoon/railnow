@@ -1,0 +1,43 @@
+package components
+
+import (
+ "fmt"
+ "github.com/hotspoon/railnow/internal/models"
+)
+
+templ SearchForm(stations []models.Station, fromID, toID int64) {
+ <form class="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800" hx-get="/search" hx-target="#schedule-results" hx-indicator="#search-loading">
+  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">From</label>
+  <select name="from" class="mt-1 w-full bg-transparent py-2 text-lg font-semibold outline-none">
+   for _, s := range stations {
+    <option value={ fmt.Sprintf("%d", s.ID) } selected?={ s.ID == fromID }>{ s.Name }</option>
+   }
+  </select>
+  <div class="my-1 border-t border-dashed border-slate-200"></div>
+  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">To</label>
+  <select name="to" class="mt-1 w-full bg-transparent py-2 text-lg font-semibold outline-none">
+   for _, s := range stations {
+    <option value={ fmt.Sprintf("%d", s.ID) } selected?={ s.ID == toID }>{ s.Name }</option>
+   }
+  </select>
+  <button class="mt-4 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]">Find next train</button>
+  <div id="search-loading" class="htmx-indicator mt-3 text-center text-sm text-slate-400">Finding trains…</div>
+ </form>
+}
+
+templ Route(from, to string) {
+ <div class="flex items-center gap-3 text-sm font-semibold"><span>{ from }</span><span class="text-blue-600">↓</span><span>{ to }</span></div>
+}
+
+templ FavoriteButton(from, to int64, active bool) {
+ <form hx-post="/favorite" hx-target="this" hx-swap="outerHTML">
+  <input type="hidden" name="from" value={ fmt.Sprintf("%d", from) }/><input type="hidden" name="to" value={ fmt.Sprintf("%d", to) }/>
+  <button class="rounded-full border px-3 py-1.5 text-sm font-semibold" aria-label="Toggle favorite">
+   if active {
+    <span>★ Saved</span>
+   } else {
+    <span>☆ Save route</span>
+   }
+  </button>
+ </form>
+}
