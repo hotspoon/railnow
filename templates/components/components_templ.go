@@ -184,7 +184,7 @@ func SearchForm(stations []models.Station, fromID, toID int64) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><button id=\"search-submit\" class=\"search-submit-button mt-4 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Find next train\">Find next train</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><button id=\"search-submit\" class=\"search-submit-button mt-6 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Find next train\">Find next train</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
