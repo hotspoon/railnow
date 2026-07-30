@@ -84,9 +84,9 @@ html {
 }
 .storybook-hero {
   position: relative;
-  min-height: 11rem;
+  min-height: auto;
   margin-bottom: 1rem !important;
-  padding-right: 8rem;
+  padding-right: 0;
 }
 .storybook-hero > * { position: relative; z-index: 1; }
 .hero-brand-row { min-height: 2.25rem; white-space: nowrap; }
@@ -101,18 +101,6 @@ html {
   max-width: 13rem;
   font-size: .95rem;
   line-height: 1.45;
-}
-.storybook-hero::after {
-  content: "";
-  position: absolute;
-  top: -.2rem;
-  right: -.35rem;
-  width: 9.75rem;
-  height: 12.25rem;
-  background: url("/images/snow-white-2-600.png") top right / contain no-repeat;
-  opacity: .46;
-  pointer-events: none;
-  z-index: 0;
 }
 .winter-storybook .bg-white,
 .winter-storybook .station-options {
