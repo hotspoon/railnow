@@ -95,7 +95,7 @@ func homeContent(stations []models.Station, fromID, toID int64, info models.Sche
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"storybook-hero mb-7\"><div class=\"hero-brand-row flex items-center justify-between\"><a href=\"/\" class=\"text-xl font-black tracking-tight\">🚆 JadwalKRL</a> <span id=\"live-clock\" class=\"text-sm font-medium text-slate-500\"></span></div><h1 class=\"hero-title mt-7 text-4xl font-black tracking-tight\">Cari jadwal <br><span class=\"text-blue-600\">KRL-mu</span></h1><p class=\"hero-subtitle mt-2 text-slate-500\">Temukan kereta berikutnya tanpa ribet.</p></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"storybook-hero mb-7\"><div class=\"hero-brand-row flex items-center justify-between\"><a href=\"/\" class=\"text-xl font-black tracking-tight\">🚆 Jadwal KRL</a> <span id=\"live-clock\" class=\"text-sm font-medium text-slate-500\"></span></div><h1 class=\"hero-title mt-7 text-4xl font-black tracking-tight\">Cari jadwal <br><span class=\"text-blue-600\">KRL-mu</span></h1><p class=\"hero-subtitle mt-2 text-slate-500\">Temukan kereta berikutnya tanpa ribet.</p></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
