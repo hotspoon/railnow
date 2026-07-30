@@ -1,4 +1,4 @@
-// Command importer loads KAI Commuter schedule CSV data into RuteKRL's SQLite database.
+// Command importer loads KAI Commuter schedule CSV data into JadwalKRL's SQLite database.
 package main
 
 import (

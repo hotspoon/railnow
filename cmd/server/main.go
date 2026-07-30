@@ -38,7 +38,7 @@ func main() {
 	if addr == "" {
 		addr = "8080"
 	}
-	log.Printf("RuteKRL is running on http://localhost:%s", addr)
+	log.Printf("JadwalKRL is running on http://localhost:%s", addr)
 	log.Fatal(http.ListenAndServe(":"+addr, r))
 }
 func seed(db *sql.DB) error {

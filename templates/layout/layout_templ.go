@@ -42,7 +42,7 @@ func Page(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · RuteKRL</title></head><body class=\"winter-storybook min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50\"><div id=\"offline-banner\" class=\"hidden bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-900\">Kamu sedang offline. Periksa lagi saat terhubung.</div><main class=\"app-shell mx-auto min-h-screen max-w-lg px-4 pb-24 pt-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · JadwalKRL</title></head><body class=\"winter-storybook min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50\"><div id=\"offline-banner\" class=\"hidden bg-amber-100 px-4 py-2 text-center text-sm font-medium text-amber-900\">Kamu sedang offline. Periksa lagi saat terhubung.</div><main class=\"app-shell mx-auto min-h-screen max-w-lg px-4 pb-24 pt-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,4 +1,4 @@
-// Package platform provides hosting-specific entry points for RuteKRL.
+// Package platform provides hosting-specific entry points for JadwalKRL.
 package platform
 
 import (

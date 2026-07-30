@@ -23,7 +23,7 @@ const (
 // ErrUnsupportedStation is returned when a catalog code is not served by KCI.
 var ErrUnsupportedStation = errors.New("station is not supported by the KCI schedule API")
 
-// Station is the stable station catalog stored by RuteKRL.
+// Station is the stable station catalog stored by JadwalKRL.
 type Station struct {
 	ID   int64
 	Code string
