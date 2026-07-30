@@ -3,20 +3,21 @@
 	"version": "0.2.0",
 	"private": true,
 	"scripts": {
-		"css": "tailwindcss -i assets/css/input.css -o public/css/output.css --minify",
+		"css": "BROWSERSLIST_IGNORE_OLD_DATA=true tailwindcss -i assets/css/input.css -o public/css/output.css --minify",
 		"test:frontend": "vitest run",
 		"test:e2e": "playwright test",
 		"test": "go test ./... && npm run test:frontend",
-		"build": "templ generate && npm run css && go build ./...",
-		"verify": "npm run build && npm test && npm run test:e2e"
+		"build": "npm run css",
+		"build:app": "templ generate && npm run css && go build ./...",
+		"verify": "npm run build:app && npm test && npm run test:e2e"
 	},
 	"devDependencies": {
 		"@playwright/test": "1.55.1",
-		"jsdom": "^26.1.0",
+		"jsdom": "27.4.0",
 		"tailwindcss": "3.4.17",
 		"vitest": "3.2.6"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": "22.x"
 	}
 }

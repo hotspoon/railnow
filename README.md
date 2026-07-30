@@ -24,7 +24,7 @@ task verify       # generation, all tests, and Go build
 docker build -t railnow . && docker run -p 8080:8080 railnow
 ```
 
-Run `npm install` once, followed by `npx playwright install chromium webkit`, before the frontend and E2E commands. The pinned frontend tools make CSS generation and browser tests reproducible on Node 18+.
+Use Node 22. Run `npm install` once, followed by `npx playwright install chromium webkit`, before the frontend and E2E commands. The pinned frontend tools make CSS generation and browser tests reproducible. `npm run build` is the deployment-safe frontend build used by Vercel; `npm run build:app` additionally regenerates templ code and compiles every Go package for local release verification.
 
 Saved routes remain private to the current browser through `localStorage`. The Saved page requests the current next scheduled train from RailNow when opened, focused, manually refreshed, or when its countdown ends.
 
