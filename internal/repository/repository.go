@@ -167,7 +167,7 @@ func (r *Repository) ScheduleInfo(ctx context.Context) (models.ScheduleInfo, err
 		return models.ScheduleInfo{}, err
 	}
 	defer rows.Close()
-	info := models.ScheduleInfo{DayType: "Jenis hari tidak diketahui"}
+	info := models.ScheduleInfo{DayType: "Jenis hari tidak diketahui", Status: "unknown"}
 	for rows.Next() {
 		var key, value string
 		if err := rows.Scan(&key, &value); err != nil {
@@ -195,14 +195,35 @@ func (r *Repository) ScheduleInfo(ctx context.Context) (models.ScheduleInfo, err
 	if err := rows.Err(); err != nil {
 		return info, err
 	}
-	if info.FetchedAt != "" {
-		if fetched, err := time.Parse(time.RFC3339, info.FetchedAt); err == nil {
-			info.Stale = time.Since(fetched) > 30*24*time.Hour
-		}
-	} else if snapshot, err := time.Parse("02 Jan 2006", info.SnapshotDate); err == nil {
-		info.Stale = time.Since(snapshot) > 30*24*time.Hour
-	}
+	applyScheduleFreshness(&info, time.Now())
 	return info, nil
+}
+
+func applyScheduleFreshness(info *models.ScheduleInfo, now time.Time) {
+	var updated time.Time
+	var err error
+	if info.FetchedAt != "" {
+		updated, err = time.Parse(time.RFC3339, info.FetchedAt)
+	} else if info.SnapshotDate != "" {
+		updated, err = time.Parse("02 Jan 2006", info.SnapshotDate)
+	}
+	if err != nil || updated.IsZero() {
+		info.Status = "unknown"
+		info.UpdatedLabel = ""
+		info.Stale = false
+		return
+	}
+	jakarta, locationErr := time.LoadLocation("Asia/Jakarta")
+	if locationErr != nil {
+		jakarta = time.FixedZone("WIB", 7*60*60)
+	}
+	info.UpdatedLabel = updated.In(jakarta).Format("02 Jan 2006, 15:04 WIB")
+	info.Stale = now.Sub(updated) > 30*24*time.Hour
+	if info.Stale {
+		info.Status = "stale"
+	} else {
+		info.Status = "available"
+	}
 }
 func minutes(a, b string) int {
 	base := "2006-01-02 "

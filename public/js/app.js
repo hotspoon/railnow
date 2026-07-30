@@ -3,6 +3,8 @@ const RECENT_KEY = "railnow.recentStations";
 let allowedDestinations = null;
 let destinationRequest = 0;
 let destinationTimer = null;
+let savedRequest = 0;
+let savedRefreshPromise = null;
 
 function debounce(callback, delay) {
   let timer = null;
@@ -72,11 +74,29 @@ function tick() {
       el.textContent = "—";
       return;
     }
-    let diff =
-      (parsed.hour % 24) * 3600 +
-      parsed.minute * 60 -
-      jakartaSeconds();
-    if (el.dataset.nextDay === "true" || diff < 0) diff += 24 * 3600;
+    if (!el.dataset.targetEpoch) {
+      let initialDiff =
+        (parsed.hour % 24) * 3600 +
+        parsed.minute * 60 -
+        jakartaSeconds();
+      const dayOffset = Math.max(0, Number(el.dataset.dayOffset || 0));
+      initialDiff += dayOffset * 24 * 3600;
+      if (dayOffset === 0 && initialDiff < 0) initialDiff = 0;
+      el.dataset.targetEpoch = String(Date.now() + initialDiff * 1000);
+    }
+    const diff = Math.max(
+      0,
+      Math.ceil((Number(el.dataset.targetEpoch) - Date.now()) / 1000),
+    );
+    if (diff <= 0) {
+      el.textContent = "Now";
+      const card = el.closest(".saved-route-card");
+      if (card && card.dataset.expired !== "true") {
+        card.dataset.expired = "true";
+        window.setTimeout(() => refreshSavedSchedules(), 1500);
+      }
+      return;
+    }
     const hours = Math.floor(diff / 3600);
     const minutes = Math.floor((diff % 3600) / 60);
     el.textContent = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
@@ -231,8 +251,246 @@ function initStations() {
     scheduleDestinationOptions(from.value);
   });
 }
+
+function initTimePicker() {
+  const input = document.querySelector("#search-time");
+  const wrap = document.querySelector("#custom-time-wrap");
+  if (!input || !wrap) return;
+  const buttons = document.querySelectorAll("[data-time-mode]");
+  const setMode = (mode) => {
+    const custom = mode === "custom";
+    input.disabled = !custom;
+    wrap.hidden = !custom;
+    if (custom && !input.value) input.value = jakartaTime(false).format();
+    buttons.forEach((button) => {
+      const active = button.dataset.timeMode === mode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    if (custom) input.focus();
+  };
+  buttons.forEach((button) =>
+    button.addEventListener("click", () => setMode(button.dataset.timeMode)),
+  );
+}
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function routeKey(route) {
+  return `${String(route.from)}:${String(route.to)}`;
+}
+
+function validSavedRoutes() {
+  return read(SAVED_KEY)
+    .filter(
+      (route) =>
+        route &&
+        /^\d+$/.test(String(route.from)) &&
+        /^\d+$/.test(String(route.to)) &&
+        String(route.from) !== String(route.to),
+    )
+    .slice(0, 10);
+}
+
+function dayName(offset) {
+  if (offset === 0) return "Hari ini";
+  if (offset === 1) return "Besok";
+  if (offset === 2) return "Lusa";
+  return `${offset} hari lagi`;
+}
+
+function savedMessage(container, message, actionLabel) {
+  container.replaceChildren();
+  const panel = element(
+    "div",
+    "saved-state rounded-2xl bg-white p-5 text-center text-slate-500 shadow-sm ring-1 ring-slate-200",
+  );
+  panel.appendChild(element("p", "", message));
+  if (actionLabel) {
+    const retry = element(
+      "button",
+      "mt-3 min-h-11 rounded-full border border-slate-200 px-4 text-sm font-bold text-blue-600",
+      actionLabel,
+    );
+    retry.type = "button";
+    retry.addEventListener("click", () => refreshSavedSchedules(true));
+    panel.appendChild(retry);
+  }
+  container.appendChild(panel);
+}
+
+function renderSavedLoading(container, routes) {
+  container.replaceChildren();
+  routes.forEach((route) => {
+    const card = element(
+      "div",
+      "saved-skeleton rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200",
+    );
+    card.setAttribute("aria-label", `Loading ${route.fromName || "saved route"}`);
+    card.appendChild(element("span", "block h-4 w-2/3 rounded bg-slate-200"));
+    card.appendChild(element("span", "mt-3 block h-8 w-1/3 rounded bg-slate-200"));
+    container.appendChild(card);
+  });
+}
+
+function savedCard(route, fallback) {
+  const card = element(
+    "article",
+    "saved-route-card rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200",
+  );
+  card.dataset.routeKey = routeKey(route);
+  const header = element("div", "flex items-start justify-between gap-3");
+  const title = element("div", "min-w-0");
+  title.appendChild(
+    element(
+      "h2",
+      "truncate font-black text-slate-900",
+      `${route.from_name || fallback.fromName || route.from} → ${route.to_name || fallback.toName || route.to}`,
+    ),
+  );
+  const remove = element(
+    "button",
+    "remove-saved min-h-11 min-w-11 rounded-full text-lg text-slate-500",
+    "×",
+  );
+  remove.type = "button";
+  remove.dataset.removeSaved = routeKey(route);
+  remove.setAttribute("aria-label", "Remove saved route");
+  header.append(title, remove);
+  card.appendChild(header);
+
+  if (route.status === "ok" && route.next) {
+    const schedule = element("div", "mt-3 flex items-end justify-between gap-3");
+    const departure = element("div", "");
+    departure.appendChild(
+      element("time", "saved-departure block text-3xl font-black", route.next.departure),
+    );
+    departure.lastChild.dataset.clockTime = "";
+    departure.appendChild(
+      element(
+        "p",
+        "mt-1 text-xs font-bold uppercase tracking-wider text-slate-500",
+        `${dayName(Number(route.next.day_offset || 0))} · Train ${route.next.number}`,
+      ),
+    );
+    const countdown = element("div", "text-right");
+    countdown.appendChild(element("p", "text-xs text-slate-500", "Berangkat dalam"));
+    const countdownValue = element("strong", "countdown-time block text-xl text-blue-600", "—");
+    countdownValue.dataset.countdown = route.next.departure;
+    countdownValue.dataset.dayOffset = String(route.next.day_offset || 0);
+    countdown.appendChild(countdownValue);
+    schedule.append(departure, countdown);
+    card.appendChild(schedule);
+    card.appendChild(
+      element(
+        "p",
+        "mt-3 truncate text-xs text-slate-500",
+        `${route.next.route} · tiba ${route.next.arrival} · ${route.next.duration_minutes} min`,
+      ),
+    );
+  } else {
+    const messages = {
+      invalid_route: "Rute tersimpan sudah tidak valid.",
+      no_service: "Belum ada layanan terjadwal untuk rute ini.",
+      error: "Jadwal rute ini belum dapat dimuat.",
+    };
+    card.appendChild(
+      element("p", "mt-3 text-sm text-slate-500", messages[route.status] || messages.error),
+    );
+  }
+
+  const open = element(
+    "a",
+    "mt-4 flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-bold text-white",
+    "Buka jadwal lengkap",
+  );
+  open.href = `/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}`;
+  card.appendChild(open);
+  return card;
+}
+
+function renderSavedRoutes(container, response, saved) {
+  const fallbackByKey = new Map(saved.map((route) => [routeKey(route), route]));
+  container.replaceChildren();
+  (response.routes || []).forEach((route) => {
+    container.appendChild(savedCard(route, fallbackByKey.get(routeKey(route)) || {}));
+  });
+  if (!container.children.length)
+    savedMessage(container, "No saved routes yet.");
+  safelyInitialize(tick);
+}
+
+async function refreshSavedSchedules(force) {
+  const container = document.querySelector("#saved-routes");
+  if (!container) return;
+  const saved = validSavedRoutes();
+  if (!saved.length) {
+    savedMessage(container, "No saved routes yet. Simpan rute dari hasil pencarian.");
+    return;
+  }
+  if (savedRefreshPromise && !force) return savedRefreshPromise;
+  const requestID = ++savedRequest;
+  renderSavedLoading(container, saved);
+  const refreshButton = document.querySelector("#refresh-saved");
+  if (refreshButton) {
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Refreshing…";
+  }
+  const controller =
+    typeof AbortController === "undefined" ? null : new AbortController();
+  const timeoutID = controller
+    ? window.setTimeout(() => controller.abort(), 8000)
+    : null;
+  let currentPromise;
+  const request = async () => {
+    try {
+      const response = await fetch("/api/saved-routes/schedules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        signal: controller ? controller.signal : undefined,
+        body: JSON.stringify({
+          routes: saved.map((route) => ({
+            from: Number(route.from),
+            to: Number(route.to),
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error(`request failed with ${response.status}`);
+      const payload = await response.json();
+      if (requestID === savedRequest) renderSavedRoutes(container, payload, saved);
+    } catch (error) {
+      if (requestID === savedRequest)
+        savedMessage(container, "Jadwal tersimpan belum dapat dimuat.", "Coba lagi");
+    } finally {
+      if (timeoutID) window.clearTimeout(timeoutID);
+      if (requestID === savedRequest && refreshButton) {
+        refreshButton.disabled = false;
+        refreshButton.textContent = "↻ Refresh";
+      }
+      if (savedRefreshPromise === currentPromise) savedRefreshPromise = null;
+    }
+  };
+  currentPromise = request();
+  savedRefreshPromise = currentPromise;
+  return savedRefreshPromise;
+}
+
 function initSaved() {
   document.addEventListener("click", (event) => {
+    const remove = event.target.closest("[data-remove-saved]");
+    if (remove) {
+      const saved = validSavedRoutes().filter(
+        (route) => routeKey(route) !== remove.dataset.removeSaved,
+      );
+      write(SAVED_KEY, saved);
+      refreshSavedSchedules(true);
+      return;
+    }
     const button = event.target.closest(".save-route");
     if (!button) return;
     const route = {
@@ -252,18 +510,16 @@ function initSaved() {
       : [route, ...saved].slice(0, 10);
     write(SAVED_KEY, saved);
     button.textContent = exists ? "☆ Save route" : "★ Saved";
+    button.setAttribute("aria-pressed", String(!exists));
   });
   const container = document.querySelector("#saved-routes");
   if (container) {
-    const saved = read(SAVED_KEY);
-    container.innerHTML = saved.length
-      ? saved
-          .map(
-            (route) =>
-              `<a class="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200" href="/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}">★ ${route.fromName} → ${route.toName}</a>`,
-          )
-          .join("")
-      : '<p class="text-slate-500">No saved routes yet.</p>';
+    refreshSavedSchedules(true);
+    const refresh = document.querySelector("#refresh-saved");
+    if (refresh) refresh.addEventListener("click", () => refreshSavedSchedules(true));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshSavedSchedules();
+    });
   }
 }
 function updateOffline() {
@@ -319,6 +575,7 @@ function safelyInitialize(callback) {
 safelyInitialize(tick);
 setInterval(() => safelyInitialize(tick), 1000);
 safelyInitialize(initStations);
+safelyInitialize(initTimePicker);
 safelyInitialize(initSaved);
 safelyInitialize(updateOffline);
 window.addEventListener("online", updateOffline);

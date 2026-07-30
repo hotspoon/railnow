@@ -25,7 +25,7 @@ templ homeContent(stations []models.Station, fromID, toID int64, info models.Sch
 		<h1 class="hero-title mt-7 text-4xl font-black tracking-tight">Cari jadwal <br/><span class="text-blue-600">KRL mu</span></h1>
 		<p class="hero-subtitle mt-2 text-slate-500">Fast commuter schedules, without the fuss.</p>
 	</header>
-	@components.SearchForm(stations, fromID, toID)
+	@components.SearchForm(stations, fromID, toID, page.SearchTime)
 	@scheduleNotice(info, "mt-3")
 	if hasResults {
 		<div class="mt-6">@SearchResult(page)</div>
@@ -35,9 +35,34 @@ templ homeContent(stations []models.Station, fromID, toID int64, info models.Sch
 }
 
 templ scheduleNotice(info models.ScheduleInfo, classes string) {
-	if info.Stale {
-		<p class={ classes + " schedule-notice text-sm font-medium text-amber-700" } role="status">Schedule data may be out of date.</p>
-	}
+	<details class={ classes + " schedule-status rounded-2xl border border-slate-200 bg-white/75 px-3 py-2 text-sm" }>
+		<summary class="flex min-h-8 cursor-pointer items-center justify-between gap-2 font-semibold">
+			if info.Status == "stale" {
+				<span class="text-amber-700">⚠ Data mungkin sudah kedaluwarsa</span>
+			} else if info.Status == "available" {
+				<span class="text-emerald-700">● Data diperbarui { info.UpdatedLabel }</span>
+			} else {
+				<span class="text-slate-500">○ Status pembaruan belum tersedia</span>
+			}
+			<span class="status-chevron text-slate-400">⌄</span>
+		</summary>
+		<div class="schedule-status-details mt-2 border-t border-slate-200 pt-2 text-xs leading-relaxed text-slate-500">
+			if info.Stale && info.UpdatedLabel != "" {
+				<p>Terakhir diperbarui { info.UpdatedLabel }.</p>
+			}
+			if info.EffectiveDate != "" {
+				<p>Jadwal efektif: { info.EffectiveDate }.</p>
+			}
+			if info.SourceName != "" {
+				if info.SourceURL != "" {
+					<p>Sumber: <a class="font-semibold text-blue-600 underline" href={ templcore.SafeURL(info.SourceURL) } target="_blank" rel="noreferrer">{ info.SourceName }</a>.</p>
+				} else {
+					<p>Sumber: { info.SourceName }.</p>
+				}
+			}
+			<p>Snapshot jadwal terencana, bukan posisi kereta atau informasi keterlambatan real-time.</p>
+		</div>
+	</details>
 }
 
 templ SearchResult(page models.SearchPage) {
@@ -49,11 +74,11 @@ templ SearchResult(page models.SearchPage) {
 		if len(page.Departures) == 0 && len(page.Transfers) == 0 {
 			<div class="rounded-3xl bg-white p-6 text-center text-slate-500 shadow-sm">No scheduled trains on this route yet.</div>
 		} else if len(page.Departures) > 0 {
-			@nextCard(page.Departures[0], page.To.Name, page.From.ID, page.To.ID)
+			@nextCard(page.Departures[0], page.To.Name, page.From.ID, page.To.ID, page.SearchTime)
 			<h2 class="mb-3 mt-7 text-lg font-bold">Upcoming</h2>
 			<div class="space-y-3">
 				for _, d := range page.Departures[1:min(len(page.Departures), 7)] {
-				@trainCard(d, page.From.ID, page.To.ID)
+				@trainCard(d, page.From.ID, page.To.ID, page.SearchTime)
 				}
 			</div>
 			if len(page.Departures) > 7 {
@@ -61,7 +86,7 @@ templ SearchResult(page models.SearchPage) {
 					<summary>{ fmt.Sprintf("Show %d more departures", len(page.Departures)-7) }</summary>
 					<div class="mt-3 space-y-3">
 						for _, d := range page.Departures[7:] {
-							@trainCard(d, page.From.ID, page.To.ID)
+							@trainCard(d, page.From.ID, page.To.ID, page.SearchTime)
 						}
 					</div>
 				</details>
@@ -80,21 +105,21 @@ templ SearchPage(page models.SearchPage) {
 	@layout.Page("Schedule", SearchResult(page))
 }
 
-templ nextCard(d models.Departure, destination string, from, to int64) {
-	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="next-train-card train-detail-link block rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25 transition active:scale-[.99]">
-		<div class="flex items-start justify-between"><p class="text-xs font-bold tracking-widest text-blue-100">NEXT TRAIN</p><span class="rounded-full bg-white/15 px-2 py-1 text-xs">Scheduled</span></div>
-		<div class="next-train-primary mt-5 flex items-end justify-between gap-4"><div class="next-train-destination"><time class="departure-time text-5xl font-black tracking-tight" data-clock-time>{ d.Departure }</time><p class="mt-2 text-xs font-bold uppercase tracking-widest text-blue-100">Destination</p><h2 class="mt-1 text-2xl font-black">{ destination }</h2></div><div class="next-train-countdown text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="countdown-time text-2xl" data-countdown={ d.Departure } data-next-day={ fmt.Sprintf("%t", d.NextDay) }>--:--</strong></div></div>
+templ nextCard(d models.Departure, destination string, from, to int64, searchTime string) {
+	<a href={ templcore.SafeURL(trainDetailURL(d.TrainID, from, to, searchTime)) } class="next-train-card train-detail-link block rounded-3xl bg-blue-600 p-5 text-white shadow-xl shadow-blue-600/25 transition active:scale-[.99]">
+		<div class="flex items-start justify-between"><p class="text-xs font-bold tracking-widest text-blue-100">NEXT TRAIN</p><span class="rounded-full bg-white/15 px-2 py-1 text-xs">{ dayLabel(d.DayOffset) }</span></div>
+		<div class="next-train-primary mt-5 flex items-end justify-between gap-4"><div class="next-train-destination"><time class="departure-time text-5xl font-black tracking-tight" data-clock-time>{ d.Departure }</time><p class="mt-2 text-xs font-bold uppercase tracking-widest text-blue-100">Destination</p><h2 class="mt-1 text-2xl font-black">{ destination }</h2></div><div class="next-train-countdown text-right"><p class="text-sm text-blue-100">Leaves in</p><strong class="countdown-time text-2xl" data-countdown={ d.Departure } data-day-offset={ fmt.Sprintf("%d", d.DayOffset) }>--:--</strong></div></div>
 		<div class="next-train-footer mt-5 flex items-center justify-between border-t border-white/20 pt-4"><span class="train-route-pill rounded-full bg-white/15 px-2 py-1 text-xs font-bold">{ d.Route }</span><span class="train-meta text-sm font-bold">Train { d.Number } · { fmt.Sprintf("%d min", d.Duration) } ›</span></div>
-		if d.NextDay {
-			<p class="mt-2 text-xs text-blue-100">First available service tomorrow</p>
+		if d.DayOffset > 0 {
+			<p class="mt-2 text-xs text-blue-100">Layanan berikutnya tersedia { dayLabel(d.DayOffset) }.</p>
 		}
 	</a>
 }
 
-templ trainCard(d models.Departure, from, to int64) {
-	<a href={ templcore.SafeURL(fmt.Sprintf("/train/%d?from=%d&to=%d", d.TrainID, from, to)) } class="upcoming-train-card train-detail-link flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800">
+templ trainCard(d models.Departure, from, to int64, searchTime string) {
+	<a href={ templcore.SafeURL(trainDetailURL(d.TrainID, from, to, searchTime)) } class="upcoming-train-card train-detail-link flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition active:scale-[.99] dark:bg-slate-900 dark:ring-slate-800">
 		<time class="text-2xl font-black tracking-tight text-slate-900 dark:text-white" data-clock-time>{ d.Departure }</time>
-		<div class="train-card-details flex-1"><strong class="block text-sm text-slate-900 dark:text-slate-50">Train { d.Number }</strong><span class={ "compact-train-route line-badge " + lineBadgeClass(d.Route) }>{ d.Route }</span></div>
+		<div class="train-card-details flex-1"><strong class="block text-sm text-slate-900 dark:text-slate-50">Train { d.Number } · { dayLabel(d.DayOffset) }</strong><span class={ "compact-train-route line-badge " + lineBadgeClass(d.Route) }>{ d.Route }</span></div>
 		<span class="text-sm text-slate-500">{ fmt.Sprintf("%d min", d.Duration) }</span><span class="text-lg font-bold text-blue-600">›</span>
 	</a>
 }
@@ -114,8 +139,19 @@ templ trainContent(stops []models.Stop, info models.ScheduleInfo, backURL string
 	</div>
 }
 
-templ Saved() {
-	@layout.Page("Saved routes", savedContent())
+templ Saved(info models.ScheduleInfo) {
+	@layout.Page("Saved routes", savedContent(info))
 }
 
-templ savedContent() { <section><h1 class="text-3xl font-black">Saved routes</h1><p class="mt-2 text-slate-500">Routes saved on this device.</p><div id="saved-routes" class="mt-6 space-y-3"></div></section> }
+templ savedContent(info models.ScheduleInfo) {
+	<section class="saved-page">
+		<div class="flex items-start justify-between gap-3">
+			<div><h1 class="text-3xl font-black">Saved routes</h1><p class="mt-1 text-sm text-slate-500">Jadwal berikutnya untuk rute di perangkat ini.</p></div>
+			<button id="refresh-saved" type="button" class="saved-refresh rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-blue-600">↻ Refresh</button>
+		</div>
+		@scheduleNotice(info, "mt-4")
+		<div id="saved-routes" class="mt-5 space-y-3" aria-live="polite">
+			<div class="saved-skeleton rounded-2xl bg-white p-4 shadow-sm"><span class="block h-4 w-2/3 rounded bg-slate-200"></span><span class="mt-3 block h-8 w-1/3 rounded bg-slate-200"></span></div>
+		</div>
+	</section>
+}

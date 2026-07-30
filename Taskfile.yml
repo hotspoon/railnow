@@ -25,9 +25,25 @@ tasks:
       - go build ./cmd/server
 
   test:
-    desc: Run all Go tests
+    desc: Run Go and frontend unit tests
     cmds:
       - go test ./...
+      - npm run test:frontend
+
+  test:e2e:
+    desc: Run mobile Chromium and WebKit end-to-end tests
+    deps: [templ, css]
+    cmds:
+      - npm run test:e2e
+
+  verify:
+    desc: Generate assets, run every test suite, and compile all Go packages
+    deps: [templ, css]
+    cmds:
+      - go test ./...
+      - npm run test:frontend
+      - npm run test:e2e
+      - go build ./...
 
   templ:
     desc: Generate Go code from templ templates

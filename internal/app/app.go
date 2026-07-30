@@ -23,5 +23,6 @@ func NewHandler(db *sql.DB) *chi.Mux {
 	r.Get("/stations/destination-options", h.DestinationOptions)
 	r.Get("/train/{id}", h.Train)
 	r.Get("/saved", h.Saved)
+	r.Post("/api/saved-routes/schedules", h.SavedRouteSchedules)
 	return r
 }

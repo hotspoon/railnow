@@ -24,12 +24,17 @@ function page() {
         ${station(3, "Bogor", "BOO")}
         ${station(4, "Cikarang", "CKR")}
       </div>
+      <button type="button" data-time-mode="now" class="time-mode-button is-active" aria-pressed="true">Sekarang</button>
+      <button type="button" data-time-mode="custom" class="time-mode-button" aria-pressed="false">Pilih jam</button>
+      <div id="custom-time-wrap" hidden>
+        <input id="search-time" name="time" type="time" disabled />
+      </div>
       <button id="search-submit" data-label="Find next train">Find next train</button>
     </form>
     <div id="offline-banner" class="hidden"></div>
     <span id="live-clock"></span>
     <time data-clock-time>05:13:30</time>
-    <strong data-countdown="05:13:30" data-next-day="false">--:--</strong>`;
+    <strong data-countdown="05:13:30" data-day-offset="0">--:--</strong>`;
 }
 
 function response(stations) {
@@ -74,6 +79,19 @@ describe("station picker", () => {
   it("normalizes timetable seconds for compact mobile cards", () => {
     expect(document.querySelector("[data-clock-time]").textContent).toBe("05:13");
     expect(document.querySelector("[data-countdown]").textContent).not.toContain(":");
+  });
+
+  it("enables and disables the custom time query without losing its value", () => {
+    document.querySelector('[data-time-mode="custom"]').click();
+    const input = document.querySelector("#search-time");
+    expect(input.disabled).toBe(false);
+    expect(input.value).toMatch(/^\d{2}:\d{2}$/);
+    expect(document.querySelector("#custom-time-wrap").hidden).toBe(false);
+
+    document.querySelector('[data-time-mode="now"]').click();
+    expect(input.disabled).toBe(true);
+    expect(input.value).toMatch(/^\d{2}:\d{2}$/);
+    expect(document.querySelector("#custom-time-wrap").hidden).toBe(true);
   });
 
   it("only exposes direct destinations after choosing an origin", async () => {

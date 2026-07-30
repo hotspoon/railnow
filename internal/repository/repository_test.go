@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
+	"github.com/hotspoon/railnow/internal/models"
 	_ "modernc.org/sqlite"
 )
 
@@ -58,5 +60,32 @@ func TestDestinationsOnlyIncludesDirectRoute(t *testing.T) {
 func TestClockTimeDropsKCISeconds(t *testing.T) {
 	if got := clockTime("05:34:30"); got != "05:34" {
 		t.Fatalf("clockTime() = %q, want 05:34", got)
+	}
+}
+
+func TestApplyScheduleFreshness(t *testing.T) {
+	now := time.Date(2026, 7, 30, 12, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name       string
+		fetchedAt  string
+		wantStatus string
+		wantStale  bool
+	}{
+		{name: "available", fetchedAt: "2026-07-29T12:00:00Z", wantStatus: "available"},
+		{name: "stale", fetchedAt: "2026-06-01T12:00:00Z", wantStatus: "stale", wantStale: true},
+		{name: "invalid", fetchedAt: "not-a-date", wantStatus: "unknown"},
+		{name: "missing", wantStatus: "unknown"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			info := models.ScheduleInfo{FetchedAt: test.fetchedAt}
+			applyScheduleFreshness(&info, now)
+			if info.Status != test.wantStatus || info.Stale != test.wantStale {
+				t.Fatalf("freshness = %q, stale=%t", info.Status, info.Stale)
+			}
+			if test.wantStatus == "available" && info.UpdatedLabel != "29 Jul 2026, 19:00 WIB" {
+				t.Fatalf("UpdatedLabel = %q", info.UpdatedLabel)
+			}
+		})
 	}
 }

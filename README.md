@@ -1,6 +1,8 @@
 # RailNow
 
-Mobile-first commuter train schedule MVP built with Go, Chi, templ, HTMX, SQLite/Turso, Goose, and Tailwind CSS.
+Mobile-first commuter train schedule app built with Go, Chi, templ, HTMX, SQLite/Turso, Goose, and Tailwind CSS.
+
+RailNow supports route-specific departures, searches from the current or a selected time, transparent schedule-snapshot freshness, and device-local saved routes with their next scheduled train.
 
 ## Run locally
 
@@ -16,11 +18,15 @@ Open `http://localhost:8080`. The application creates `data/railnow.db`, applies
 task templ       # regenerate templ Go code after editing templates
 task css         # rebuild Tailwind CSS
 task sqlc        # generate query code from db/queries
-task test
+task test         # Go and Vitest unit tests
+task test:e2e     # Playwright mobile Chromium and WebKit
+task verify       # generation, all tests, and Go build
 docker build -t railnow . && docker run -p 8080:8080 railnow
 ```
 
-Run `npm install` once before `task css`. The pinned Tailwind CLI is installed as a development dependency, so CSS builds are reproducible on Node 18+ and do not rely on a transient `npx` download.
+Run `npm install` once, followed by `npx playwright install chromium webkit`, before the frontend and E2E commands. The pinned frontend tools make CSS generation and browser tests reproducible on Node 18+.
+
+Saved routes remain private to the current browser through `localStorage`. The Saved page requests the current next scheduled train from RailNow when opened, focused, manually refreshed, or when its countdown ends.
 
 ## Importing KRL schedules
 

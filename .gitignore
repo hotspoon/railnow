@@ -10,6 +10,8 @@ tmp/
 node_modules/
 .task/
 .cache/
+test-results/
+playwright-report/
 
 # OS files
 .DS_Store
