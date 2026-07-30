@@ -1,5 +1,6 @@
 const SAVED_KEY = "railnow.savedRoutes";
 const RECENT_KEY = "railnow.recentStations";
+const RECENT_ROUTE_KEY = "railnow.recentRoutes";
 let allowedDestinations = null;
 let destinationRequest = 0;
 let destinationTimer = null;
@@ -89,7 +90,7 @@ function tick() {
       Math.ceil((Number(el.dataset.targetEpoch) - Date.now()) / 1000),
     );
     if (diff <= 0) {
-      el.textContent = "Now";
+      el.textContent = "Sekarang";
       const card = el.closest(".saved-route-card");
       if (card && card.dataset.expired !== "true") {
         card.dataset.expired = "true";
@@ -127,8 +128,10 @@ function setStation(target, id, name) {
   if (trigger) trigger.textContent = name;
   document.querySelector(`#${target}-query`).value = "";
   document.querySelector(`#${target}-options`).hidden = true;
-  const recents = read(RECENT_KEY).filter((station) => station.id !== id);
-  write(RECENT_KEY, [{ id, name }, ...recents].slice(0, 5));
+  if (trigger) trigger.setAttribute("aria-expanded", "false");
+  document.querySelectorAll(`#${target}-options [data-station-id]`).forEach((option) => {
+    option.setAttribute("aria-selected", String(option.dataset.stationId === String(id)));
+  });
   if (target === "from") scheduleDestinationOptions(id);
 }
 async function updateDestinationOptions(from) {
@@ -142,7 +145,7 @@ async function updateDestinationOptions(from) {
     : null;
   if (trigger) {
     trigger.disabled = true;
-    trigger.textContent = "Loading destinations…";
+    trigger.textContent = "Memuat tujuan…";
   }
   if (swap) swap.disabled = true;
   try {
@@ -172,8 +175,8 @@ async function updateDestinationOptions(from) {
     if (requestID !== destinationRequest) return;
     if (trigger) {
       trigger.disabled = false;
-      if (trigger.textContent === "Loading destinations…")
-        trigger.textContent = originalLabel || "Select station";
+      if (trigger.textContent === "Memuat tujuan…")
+        trigger.textContent = originalLabel || "Pilih stasiun";
     }
     if (swap) swap.disabled = false;
   }
@@ -184,13 +187,23 @@ function initStations() {
   document.querySelectorAll(".station-trigger").forEach((trigger) => {
     const target = trigger.dataset.target;
     const selected = document.querySelector(`#${target}`).value;
-    if (selected) trigger.textContent = stationName(selected);
+    if (selected) {
+      trigger.textContent = stationName(selected);
+      document.querySelectorAll(`#${target}-options [data-station-id]`).forEach((option) => {
+        option.setAttribute("aria-selected", String(option.dataset.stationId === String(selected)));
+      });
+    }
     trigger.addEventListener("click", () => {
       document.querySelectorAll(".station-options").forEach((panel) => {
-        if (panel.id !== `${target}-options`) panel.hidden = true;
+        if (panel.id !== `${target}-options`) {
+          panel.hidden = true;
+          const otherTarget = panel.id.replace("-options", "");
+          document.querySelector(`#${otherTarget}-trigger`)?.setAttribute("aria-expanded", "false");
+        }
       });
       const panel = document.querySelector(`#${target}-options`);
       panel.hidden = !panel.hidden;
+      trigger.setAttribute("aria-expanded", String(!panel.hidden));
       if (!panel.hidden) document.querySelector(`#${target}-query`).focus();
     });
     if (target === "from" && selected) scheduleDestinationOptions(selected);
@@ -216,7 +229,34 @@ function initStations() {
       options.hidden = false;
     };
     input.addEventListener("input", filterOptions);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        document.querySelector(`#${target}-options [data-station-id]:not([hidden])`)?.focus();
+      }
+      if (event.key === "Escape") {
+        document.querySelector(`#${target}-options`).hidden = true;
+        document.querySelector(`#${target}-trigger`).setAttribute("aria-expanded", "false");
+        document.querySelector(`#${target}-trigger`).focus();
+      }
+    });
   });
+  document.querySelectorAll(".station-options").forEach((panel) => panel.addEventListener("keydown", (event) => {
+    const options = [...panel.querySelectorAll("[data-station-id]:not([hidden])")];
+    const index = options.indexOf(document.activeElement);
+    const target = panel.id.replace("-options", "");
+    if (event.key === "Escape") {
+      event.preventDefault();
+      panel.hidden = true;
+      document.querySelector(`#${target}-trigger`).setAttribute("aria-expanded", "false");
+      document.querySelector(`#${target}-trigger`).focus();
+    }
+    if ((event.key === "ArrowDown" || event.key === "ArrowUp") && options.length) {
+      event.preventDefault();
+      const next = event.key === "ArrowDown" ? Math.min(index + 1, options.length - 1) : Math.max(index - 1, 0);
+      options[next < 0 ? 0 : next].focus();
+    }
+  }));
   document.addEventListener("click", (event) => {
     const option = event.target.closest("[data-station-id]");
     if (!option) return;
@@ -224,6 +264,13 @@ function initStations() {
       .closest(".station-options")
       .id.replace("-options", "");
     setStation(target, option.dataset.stationId, option.dataset.stationName);
+  });
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".station-options, .station-trigger")) return;
+    document.querySelectorAll(".station-options").forEach((panel) => {
+      panel.hidden = true;
+      document.querySelector(`#${panel.id.replace("-options", "")}-trigger`)?.setAttribute("aria-expanded", "false");
+    });
   });
   const swapButton = document.querySelector("#swap-route");
   if (swapButton) swapButton.addEventListener("click", () => {
@@ -331,7 +378,7 @@ function renderSavedLoading(container, routes) {
       "div",
       "saved-skeleton rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200",
     );
-    card.setAttribute("aria-label", `Loading ${route.fromName || "saved route"}`);
+    card.setAttribute("aria-label", `Memuat ${route.fromName || "rute tersimpan"}`);
     card.appendChild(element("span", "block h-4 w-2/3 rounded bg-slate-200"));
     card.appendChild(element("span", "mt-3 block h-8 w-1/3 rounded bg-slate-200"));
     container.appendChild(card);
@@ -350,7 +397,7 @@ function savedCard(route, fallback) {
     element(
       "h2",
       "truncate font-black text-slate-900",
-      `${route.from_name || fallback.fromName || route.from} → ${route.to_name || fallback.toName || route.to}`,
+      route.label || `${route.from_name || fallback.fromName || route.from} → ${route.to_name || fallback.toName || route.to}`,
     ),
   );
   const remove = element(
@@ -360,9 +407,14 @@ function savedCard(route, fallback) {
   );
   remove.type = "button";
   remove.dataset.removeSaved = routeKey(route);
-  remove.setAttribute("aria-label", "Remove saved route");
+  remove.setAttribute("aria-label", "Hapus rute tersimpan");
   header.append(title, remove);
   card.appendChild(header);
+  if (route.label) card.appendChild(element("p", "mt-1 text-xs text-slate-500", `${route.from_name || fallback.fromName} → ${route.to_name || fallback.toName}`));
+  const rename = element("button", "mt-2 text-xs font-bold text-blue-600", route.label ? "Ubah nama" : "Beri nama");
+  rename.type = "button";
+  rename.dataset.renameSaved = routeKey(route);
+  card.appendChild(rename);
 
   if (route.status === "ok" && route.next) {
     const schedule = element("div", "mt-3 flex items-end justify-between gap-3");
@@ -375,7 +427,7 @@ function savedCard(route, fallback) {
       element(
         "p",
         "mt-1 text-xs font-bold uppercase tracking-wider text-slate-500",
-        `${dayName(Number(route.next.day_offset || 0))} · Train ${route.next.number}`,
+        `${dayName(Number(route.next.day_offset || 0))} · KRL ${route.next.number}`,
       ),
     );
     const countdown = element("div", "text-right");
@@ -390,7 +442,7 @@ function savedCard(route, fallback) {
       element(
         "p",
         "mt-3 truncate text-xs text-slate-500",
-        `${route.next.route} · tiba ${route.next.arrival} · ${route.next.duration_minutes} min`,
+        `${route.next.route} · tiba ${route.next.arrival} · ${route.next.duration_minutes} menit`,
       ),
     );
   } else {
@@ -407,7 +459,7 @@ function savedCard(route, fallback) {
   const open = element(
     "a",
     "mt-4 flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-bold text-white",
-    "Buka jadwal lengkap",
+    "Buka jadwal",
   );
   open.href = `/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}`;
   card.appendChild(open);
@@ -421,7 +473,7 @@ function renderSavedRoutes(container, response, saved) {
     container.appendChild(savedCard(route, fallbackByKey.get(routeKey(route)) || {}));
   });
   if (!container.children.length)
-    savedMessage(container, "No saved routes yet.");
+    savedMessage(container, "Belum ada rute tersimpan.");
   safelyInitialize(tick);
 }
 
@@ -430,7 +482,7 @@ async function refreshSavedSchedules(force) {
   if (!container) return;
   const saved = validSavedRoutes();
   if (!saved.length) {
-    savedMessage(container, "No saved routes yet. Simpan rute dari hasil pencarian.");
+    savedMessage(container, "Belum ada rute tersimpan. Simpan dari hasil pencarian.");
     return;
   }
   if (savedRefreshPromise && !force) return savedRefreshPromise;
@@ -439,7 +491,7 @@ async function refreshSavedSchedules(force) {
   const refreshButton = document.querySelector("#refresh-saved");
   if (refreshButton) {
     refreshButton.disabled = true;
-    refreshButton.textContent = "Refreshing…";
+    refreshButton.textContent = "Memuat…";
   }
   const controller =
     typeof AbortController === "undefined" ? null : new AbortController();
@@ -470,7 +522,7 @@ async function refreshSavedSchedules(force) {
       if (timeoutID) window.clearTimeout(timeoutID);
       if (requestID === savedRequest && refreshButton) {
         refreshButton.disabled = false;
-        refreshButton.textContent = "↻ Refresh";
+        refreshButton.textContent = "↻ Muat ulang";
       }
       if (savedRefreshPromise === currentPromise) savedRefreshPromise = null;
     }
@@ -487,6 +539,18 @@ function initSaved() {
       const saved = validSavedRoutes().filter(
         (route) => routeKey(route) !== remove.dataset.removeSaved,
       );
+      write(SAVED_KEY, saved);
+      refreshSavedSchedules(true);
+      return;
+    }
+    const rename = event.target.closest("[data-rename-saved]");
+    if (rename) {
+      const saved = validSavedRoutes();
+      const route = saved.find((item) => routeKey(item) === rename.dataset.renameSaved);
+      if (!route) return;
+      const label = window.prompt("Nama rute (opsional)", route.label || "");
+      if (label === null) return;
+      route.label = label.trim().slice(0, 32);
       write(SAVED_KEY, saved);
       refreshSavedSchedules(true);
       return;
@@ -509,7 +573,7 @@ function initSaved() {
         )
       : [route, ...saved].slice(0, 10);
     write(SAVED_KEY, saved);
-    button.textContent = exists ? "☆ Save route" : "★ Saved";
+    button.textContent = exists ? "☆ Simpan rute" : "★ Tersimpan";
     button.setAttribute("aria-pressed", String(!exists));
   });
   const container = document.querySelector("#saved-routes");
@@ -530,8 +594,37 @@ function setSearchLoading(form, loading) {
   const button = form.querySelector("#search-submit");
   if (!button) return;
   button.disabled = loading;
-  button.textContent = loading ? "Finding trains…" : button.dataset.label;
+  button.textContent = loading ? "Mencari jadwal…" : button.dataset.label;
   form.setAttribute("aria-busy", String(loading));
+}
+function setSearchFeedback(form, message) {
+  const feedback = form.querySelector("#search-feedback");
+  if (!feedback) return;
+  feedback.textContent = message || "";
+  feedback.classList.toggle("hidden", !message);
+}
+function rememberRecentRoute(form) {
+  const from = form.querySelector("#from")?.value;
+  const to = form.querySelector("#to")?.value;
+  if (!from || !to || from === to) return;
+  const route = { from, to, fromName: stationName(from), toName: stationName(to) };
+  const routes = read(RECENT_KEY).filter((item) => !(item.from === from && item.to === to));
+  write(RECENT_KEY, [route, ...routes].slice(0, 5));
+  renderRecentRoutes();
+}
+function renderRecentRoutes() {
+  const section = document.querySelector("#recent-routes");
+  if (!section) return;
+  const routes = read(RECENT_KEY).filter((route) => route.from && route.to);
+  section.hidden = routes.length === 0;
+  const container = section.querySelector("div");
+  if (!container) return;
+  container.replaceChildren();
+  routes.forEach((route) => {
+    const link = element("a", "rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-100", `${route.fromName || route.from} → ${route.toName || route.to}`);
+    link.href = `/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}`;
+    container.appendChild(link);
+  });
 }
 function resetSearchLoading() {
   document.querySelectorAll("form").forEach((form) => {
@@ -541,7 +634,11 @@ function resetSearchLoading() {
 document.body.addEventListener("htmx:beforeRequest", (event) => {
   const element = event.detail && event.detail.elt;
   const form = element && element.closest ? element.closest("form") : null;
-  if (form && form.querySelector("#search-submit")) setSearchLoading(form, true);
+  if (form && form.querySelector("#search-submit")) {
+    setSearchFeedback(form, "");
+    rememberRecentRoute(form);
+    setSearchLoading(form, true);
+  }
 });
 document.body.addEventListener("htmx:afterRequest", (event) => {
   const element = event.detail && event.detail.elt;
@@ -549,7 +646,16 @@ document.body.addEventListener("htmx:afterRequest", (event) => {
   if (form && form.querySelector("#search-submit")) setSearchLoading(form, false);
 });
 document.body.addEventListener("htmx:sendError", resetSearchLoading);
-document.body.addEventListener("htmx:responseError", resetSearchLoading);
+document.body.addEventListener("htmx:sendError", (event) => {
+  resetSearchLoading();
+  const form = event.detail?.elt?.closest?.("form");
+  if (form) setSearchFeedback(form, "Jadwal belum dapat dimuat. Periksa koneksi lalu coba lagi.");
+});
+document.body.addEventListener("htmx:responseError", (event) => {
+  resetSearchLoading();
+  const form = event.detail?.elt?.closest?.("form");
+  if (form) setSearchFeedback(form, "Jadwal belum dapat dimuat. Periksa pilihan rute lalu coba lagi.");
+});
 document.addEventListener("click", (event) => {
   const detail = event.target.closest(".train-detail-link");
   if (detail) {
@@ -577,6 +683,7 @@ setInterval(() => safelyInitialize(tick), 1000);
 safelyInitialize(initStations);
 safelyInitialize(initTimePicker);
 safelyInitialize(initSaved);
+safelyInitialize(renderRecentRoutes);
 safelyInitialize(updateOffline);
 window.addEventListener("online", updateOffline);
 window.addEventListener("offline", updateOffline);

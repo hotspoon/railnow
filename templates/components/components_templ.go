@@ -34,7 +34,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form action=\"/search\" method=\"get\" class=\"storybook-select-card rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800\" hx-get=\"/search\" hx-target=\"#schedule-results\" hx-swap=\"outerHTML\" hx-indicator=\"#search-loading\" hx-push-url=\"true\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">From</label> <button type=\"button\" id=\"from-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"from\">Select station</button> <input id=\"from\" name=\"from\" type=\"hidden\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form action=\"/search\" method=\"get\" class=\"storybook-select-card rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800\" hx-get=\"/search\" hx-target=\"#schedule-results\" hx-swap=\"outerHTML\" hx-indicator=\"#search-loading\" hx-push-url=\"true\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">Dari</label> <button type=\"button\" id=\"from-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"from\" aria-haspopup=\"listbox\" aria-expanded=\"false\" aria-controls=\"from-options\">Pilih stasiun</button> <input id=\"from\" name=\"from\" type=\"hidden\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,7 +47,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div id=\"from-options\" class=\"station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800\" role=\"listbox\" hidden><input id=\"from-query\" class=\"station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800\" autocomplete=\"off\" placeholder=\"Search station\" data-target=\"from\"><div class=\"station-option-list mt-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div id=\"from-options\" class=\"station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800\" role=\"listbox\" aria-label=\"Pilih stasiun asal\" hidden><input id=\"from-query\" class=\"station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800\" autocomplete=\"off\" placeholder=\"Cari stasiun\" data-target=\"from\"><div class=\"station-option-list mt-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +109,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div><div class=\"my-1 border-t border-dashed border-slate-200\"></div><div class=\"flex items-center justify-between\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">To</label><button type=\"button\" id=\"swap-route\" class=\"text-sm font-bold text-blue-600\">Swap</button></div><button type=\"button\" id=\"to-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"to\">Select station</button> <input id=\"to\" name=\"to\" type=\"hidden\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div><div class=\"my-1 border-t border-dashed border-slate-200\"></div><div class=\"flex items-center justify-between\"><label class=\"block text-xs font-bold uppercase tracking-widest text-slate-400\">Ke</label><button type=\"button\" id=\"swap-route\" class=\"text-sm font-bold text-blue-600\">Tukar</button></div><button type=\"button\" id=\"to-trigger\" class=\"station-trigger mt-1 w-full py-2 text-left text-lg font-semibold\" data-target=\"to\" aria-haspopup=\"listbox\" aria-expanded=\"false\" aria-controls=\"to-options\">Pilih stasiun</button> <input id=\"to\" name=\"to\" type=\"hidden\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -122,7 +122,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div id=\"to-options\" class=\"station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800\" role=\"listbox\" hidden><input id=\"to-query\" class=\"station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800\" autocomplete=\"off\" placeholder=\"Search station\" data-target=\"to\"><div class=\"station-option-list mt-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div id=\"to-options\" class=\"station-options mt-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:bg-slate-900 dark:ring-slate-800\" role=\"listbox\" aria-label=\"Pilih stasiun tujuan\" hidden><input id=\"to-query\" class=\"station-query w-full rounded-lg bg-slate-50 px-3 py-2 text-sm outline-none dark:bg-slate-800\" autocomplete=\"off\" placeholder=\"Cari stasiun\" data-target=\"to\"><div class=\"station-option-list mt-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -184,7 +184,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><fieldset class=\"time-choice mt-4 border-t border-dashed border-slate-200 pt-4\"><legend class=\"text-xs font-bold uppercase tracking-widest text-slate-400\">Departure time</legend><div class=\"time-mode-grid mt-2 grid grid-cols-2 gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><fieldset class=\"time-choice mt-4 border-t border-dashed border-slate-200 pt-4\"><legend class=\"text-xs font-bold uppercase tracking-widest text-slate-400\">Waktu berangkat</legend><div class=\"time-mode-grid mt-2 grid grid-cols-2 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -287,7 +287,7 @@ func SearchForm(stations []models.Station, fromID, toID int64, searchTime string
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " class=\"time-input w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base font-bold outline-none focus:border-blue-500 dark:bg-slate-800\"><p class=\"mt-1 text-xs text-slate-500\">Jam yang sudah lewat akan dicari untuk besok.</p></div></fieldset><button id=\"search-submit\" class=\"search-submit-button mt-6 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Find next train\">Find next train</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " class=\"time-input w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base font-bold outline-none focus:border-blue-500 dark:bg-slate-800\"><p class=\"mt-1 text-xs text-slate-500\">Jam yang sudah lewat akan dicari untuk besok.</p></div></fieldset><button id=\"search-submit\" class=\"search-submit-button mt-6 w-full rounded-2xl bg-blue-600 py-3.5 font-bold text-white shadow-lg shadow-blue-600/25 active:scale-[.98]\" data-label=\"Cari kereta berikutnya\">Cari kereta berikutnya</button><p id=\"search-feedback\" class=\"mt-3 hidden text-center text-sm text-rose-600\" role=\"alert\"></p></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -472,7 +472,7 @@ func FavoriteButton(from, to int64, active bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" aria-label=\"Toggle saved route\">☆ Save route</button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" aria-label=\"Simpan rute\">☆ Simpan rute</button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

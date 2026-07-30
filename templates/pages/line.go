@@ -44,3 +44,11 @@ func trainDetailURL(trainID, from, to int64, searchTime string) string {
 	}
 	return value
 }
+
+func trainDestination(route string) string {
+	parts := strings.Split(route, "→")
+	if len(parts) == 0 {
+		return route
+	}
+	return strings.TrimSpace(parts[len(parts)-1])
+}
