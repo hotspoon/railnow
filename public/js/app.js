@@ -675,7 +675,7 @@ function safelyInitialize(callback) {
     callback();
   } catch (error) {
     // Keep independent controls usable if a browser blocks one optional API.
-    console.warn("RailNow enhancement unavailable", error);
+    console.warn("RuteKRL enhancement unavailable", error);
   }
 }
 safelyInitialize(tick);
@@ -697,6 +697,6 @@ if ("serviceWorker" in navigator) {
       .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
       .then(() => ("caches" in window ? caches.keys() : []))
       .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-      .catch((error) => console.warn("RailNow cache cleanup unavailable", error));
+      .catch((error) => console.warn("RuteKRL cache cleanup unavailable", error));
   });
 }

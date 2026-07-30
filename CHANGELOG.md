@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to RailNow are documented in this file. Releases follow Semantic Versioning.
+All notable changes to RuteKRL are documented in this file. Releases follow Semantic Versioning.
 
 ## [0.2.0] - 2026-07-30
 

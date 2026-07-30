@@ -1,4 +1,4 @@
-// Package app wires RailNow's HTTP routes to its services.
+// Package app wires RuteKRL's HTTP routes to its services.
 package app
 
 import (
@@ -10,7 +10,7 @@ import (
 	"github.com/hotspoon/railnow/internal/service"
 )
 
-// NewHandler returns the dynamic RailNow application routes. Static files are
+// NewHandler returns the dynamic RuteKRL application routes. Static files are
 // served by the hosting platform in production and by cmd/server locally.
 func NewHandler(db *sql.DB) *chi.Mux {
 	s := service.New(repository.New(db))

@@ -1,4 +1,4 @@
-// Command migrate-turso copies RailNow's local SQLite data into a Turso database.
+// Command migrate-turso copies RuteKRL's local SQLite data into a Turso database.
 package main
 
 import (

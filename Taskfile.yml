@@ -13,7 +13,7 @@ tasks:
       - air
 
   run:
-    desc: Start RailNow locally at http://localhost:8080
+    desc: Start RuteKRL locally at http://localhost:8080
     deps: [templ]
     cmds:
       - go run ./cmd/server

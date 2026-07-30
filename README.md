@@ -1,8 +1,8 @@
-# RailNow
+# RuteKRL
 
 Mobile-first commuter train schedule app built with Go, Chi, templ, HTMX, SQLite/Turso, Goose, and Tailwind CSS.
 
-RailNow supports route-specific departures, searches from the current or a selected time, transparent schedule-snapshot freshness, and device-local saved routes with their next scheduled train.
+RuteKRL supports route-specific departures, searches from the current or a selected time, transparent schedule-snapshot freshness, and device-local saved routes with their next scheduled train.
 
 ## Run locally
 
@@ -21,12 +21,12 @@ task sqlc        # generate query code from db/queries
 task test         # Go and Vitest unit tests
 task test:e2e     # Playwright mobile Chromium and WebKit
 task verify       # generation, all tests, and Go build
-docker build -t railnow . && docker run -p 8080:8080 railnow
+docker build -t rutekrl . && docker run -p 8080:8080 rutekrl
 ```
 
 Use Node 22. Run `npm install` once, followed by `npx playwright install chromium webkit`, before the frontend and E2E commands. The pinned frontend tools make CSS generation and browser tests reproducible. `npm run build` is the deployment-safe frontend build used by Vercel; `npm run build:app` additionally regenerates templ code and compiles every Go package for local release verification.
 
-Saved routes remain private to the current browser through `localStorage`. The Saved page requests the current next scheduled train from RailNow when opened, focused, manually refreshed, or when its countdown ends.
+Saved routes remain private to the current browser through `localStorage`. The Saved page requests the current next scheduled train from RuteKRL when opened, focused, manually refreshed, or when its countdown ends.
 
 ## Importing KRL schedules
 
@@ -36,7 +36,7 @@ The app starts with a small demo schedule. To replace it with the public Jabodet
 task import:krl
 ```
 
-This downloads CSV files into the ignored `.cache/` directory and replaces the local SQLite data. The importer preserves each train's ordered stops based on its departure times. The source does not provide per-stop arrival times, so RailNow uses the departure time for both arrival and departure until a more detailed source is available.
+This downloads CSV files into the ignored `.cache/` directory and replaces the local SQLite data. The importer preserves each train's ordered stops based on its departure times. The source does not provide per-stop arrival times, so RuteKRL uses the departure time for both arrival and departure until a more detailed source is available.
 
 To refresh Turso from KAI Commuter's public schedule API, ensure `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` are set, then run:
 
@@ -46,7 +46,7 @@ task refresh:schedules
 
 The command first reads KAI Commuter's public station catalog, then fetches every enabled station sequentially (500 ms apart), and writes a raw diagnostic snapshot to the ignored `.cache/kci/` directory. It also checkpoints each successful station in a date-scoped progress file, so rerunning after a timeout resumes unfinished stations instead of downloading the completed ones again. It validates the complete result before replacing `trains` and `schedules` in one Turso transaction; `favorites` and `searches` are preserved. A failed request, parse, validation, or write leaves the active timetable unchanged.
 
-Some API routes terminate beyond the station-picker catalog. RailNow records those published terminal destinations with deterministic `KCI_DEST_*` codes so the journey remains searchable; they are marked as destination-only stations.
+Some API routes terminate beyond the station-picker catalog. RuteKRL records those published terminal destinations with deterministic `KCI_DEST_*` codes so the journey remains searchable; they are marked as destination-only stations.
 
 This is a **KAI Commuter API schedule snapshot**, not real-time train tracking, position, or delay information. The old published-CSV scraper remains available through `go run ./cmd/scraper` and `go run ./cmd/importer` for historical/manual imports.
 
@@ -70,13 +70,13 @@ TURSO_AUTH_TOKEN=your-token
 Create a Turso database and token, then migrate the existing local database with:
 
 ```sh
-turso db create railnow
-export TURSO_DATABASE_URL="$(turso db show --url railnow)"
-export TURSO_AUTH_TOKEN="$(turso db tokens create railnow)"
+turso db create rutekrl
+export TURSO_DATABASE_URL="$(turso db show --url rutekrl)"
+export TURSO_AUTH_TOKEN="$(turso db tokens create rutekrl)"
 task migrate:turso
 ```
 
-`task migrate:turso` applies this repository's migrations to Turso first, then copies all RailNow tables. It refuses to overwrite a non-empty Turso database unless run with `go run ./cmd/migrate-turso --replace`. Deployments only need the two `TURSO_*` variables; do not set `DATABASE_URL` to the Turso URL.
+`task migrate:turso` applies this repository's migrations to Turso first, then copies all RuteKRL tables. It refuses to overwrite a non-empty Turso database unless run with `go run ./cmd/migrate-turso --replace`. Deployments only need the two `TURSO_*` variables; do not set `DATABASE_URL` to the Turso URL.
 
 ## Deploying to Vercel
 
@@ -89,3 +89,7 @@ This repository is configured as a Go Vercel Function. The function connects dir
 For a CLI deployment, run `vercel`, follow the project-linking prompt, then run `vercel --prod`. Use the same two Turso environment variables in the Vercel dashboard; never commit `.env`.
 
 Vercel Functions should run in a region near the Turso database. Select that region in the Vercel project settings before production deployment.
+
+## Disclaimer
+
+RuteKRL is an independent portfolio project and is not affiliated with KAI or KAI Commuter.

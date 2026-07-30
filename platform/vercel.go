@@ -1,4 +1,4 @@
-// Package platform provides hosting-specific entry points for RailNow.
+// Package platform provides hosting-specific entry points for RuteKRL.
 package platform
 
 import (
