@@ -1,6 +1,7 @@
 const SAVED_KEY = "railnow.savedRoutes";
 const RECENT_KEY = "railnow.recentStations";
 const RECENT_ROUTE_KEY = "railnow.recentRoutes";
+const THEME_KEY = "jadwalkrl.theme";
 let allowedDestinations = null;
 let destinationRequest = 0;
 let destinationTimer = null;
@@ -117,6 +118,58 @@ function write(key, value) {
   } catch (error) {
     // Opera private mode may deny storage. The current interaction still works.
   }
+}
+function applyTheme(theme) {
+  const selected = theme === "princess" ? "snowwhite" : theme;
+  const resolved = ["winter", "dark", "snowwhite"].includes(selected) ? selected : "winter";
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.classList.toggle("dark", resolved === "dark");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = { winter: "#294b9b", dark: "#0f172a", snowwhite: "#1f4f9f" }[resolved];
+  document.querySelectorAll("[data-theme-option]").forEach((option) => {
+    option.setAttribute("aria-checked", String(option.dataset.themeOption === resolved));
+  });
+  try {
+    localStorage.setItem(THEME_KEY, resolved);
+  } catch (error) {
+    // The selected theme remains active when storage is unavailable.
+  }
+}
+function initTheme() {
+  const toggle = document.querySelector("#theme-menu-toggle");
+  const menu = document.querySelector("#theme-menu");
+  if (!toggle || !menu) return;
+  let saved = "winter";
+  try {
+    saved = localStorage.getItem(THEME_KEY) || document.documentElement.dataset.theme || "winter";
+  } catch (error) {
+    saved = document.documentElement.dataset.theme || "winter";
+  }
+  applyTheme(saved);
+  toggle.addEventListener("click", () => {
+    const open = menu.classList.toggle("hidden");
+    toggle.setAttribute("aria-expanded", String(!open));
+  });
+  menu.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-theme-option]");
+    if (!option) return;
+    applyTheme(option.dataset.themeOption);
+    menu.classList.add("hidden");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#theme-menu, #theme-menu-toggle")) {
+      menu.classList.add("hidden");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || menu.classList.contains("hidden")) return;
+    menu.classList.add("hidden");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+  });
 }
 function stationName(id) {
   const station = document.querySelector(`[data-station-id="${id}"]`);
@@ -684,6 +737,7 @@ safelyInitialize(initStations);
 safelyInitialize(initTimePicker);
 safelyInitialize(initSaved);
 safelyInitialize(renderRecentRoutes);
+safelyInitialize(initTheme);
 safelyInitialize(updateOffline);
 window.addEventListener("online", updateOffline);
 window.addEventListener("offline", updateOffline);

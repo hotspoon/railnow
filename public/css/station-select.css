@@ -169,6 +169,21 @@ html {
 .schedule-status .status-chevron { transition: transform .2s ease; }
 .schedule-status[open] .status-chevron { transform: rotate(180deg); }
 .schedule-status-details p + p { margin-top: .2rem; }
+#recent-routes > div {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: .25rem;
+  scrollbar-width: none;
+}
+#recent-routes > div::-webkit-scrollbar { display: none; }
+#recent-routes > div > a {
+  flex: 0 0 auto;
+  max-width: min(82vw, 22rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .storybook-select-card {
   isolation: isolate;
   overflow: visible;
@@ -191,7 +206,15 @@ html {
   align-items: end;
   gap: .75rem;
 }
-.next-train-destination { min-width: 0; }
+.next-train-departure { min-width: 0; }
+.next-train-destination {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.next-train-destination h2 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .departure-time {
   display: block;
   font-size: clamp(2.65rem, 13vw, 3.25rem) !important;
@@ -252,6 +275,122 @@ html {
   animation: saved-shimmer 1.25s infinite;
 }
 @keyframes saved-shimmer { to { transform: translateX(100%); } }
+
+/* Theme picker and complete dark-theme overrides. */
+.theme-menu {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: grid;
+  min-width: 10.5rem;
+  gap: .25rem;
+  padding: .4rem;
+  border: 1px solid #c8d9f2;
+  border-radius: 1rem;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 12px 30px rgba(35,68,143,.22);
+}
+.theme-menu.hidden { display: none; }
+.theme-menu button {
+  min-height: 2.5rem;
+  border-radius: .75rem;
+  padding: .5rem .75rem;
+  color: #17213e;
+  font-size: .875rem;
+  font-weight: 800;
+  text-align: left;
+}
+.theme-menu button:hover,
+.theme-menu button[aria-checked="true"] { background: #eaf1ff; color: #294b9b; }
+html[data-theme="dark"] { background: #020617; }
+html[data-theme="dark"] .winter-storybook {
+  background: radial-gradient(circle at 85% 8%, #263867 0, transparent 22%), linear-gradient(150deg, #0f172a, #020617 72%) !important;
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .winter-storybook .bg-white,
+html[data-theme="dark"] .winter-storybook .station-options { background: rgba(15,23,42,.94) !important; border-color: #334155 !important; box-shadow: 0 8px 22px rgba(0,0,0,.3); }
+html[data-theme="dark"] .winter-storybook .bg-blue-600 { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; box-shadow: 0 10px 22px rgba(37,99,235,.25) !important; }
+html[data-theme="dark"] .winter-storybook .text-slate-900 { color: #f8fafc !important; }
+html[data-theme="dark"] .winter-storybook .text-slate-500 { color: #cbd5e1 !important; }
+html[data-theme="dark"] .winter-storybook .text-slate-400 { color: #94a3b8 !important; }
+html[data-theme="dark"] .winter-storybook .text-blue-600 { color: #93c5fd !important; }
+html[data-theme="dark"] .winter-storybook .border-slate-200 { border-color: #334155 !important; }
+html[data-theme="dark"] .winter-storybook .station-trigger,
+html[data-theme="dark"] .winter-storybook .station-query { color: #f8fafc; }
+html[data-theme="dark"] .winter-storybook .station-query { border-color: #334155; background: #1e293b; }
+html[data-theme="dark"] .winter-storybook .save-route { border-color: #fbbf24; background: #1e293b; color: #fde68a; box-shadow: 0 3px 0 #854d0e; }
+html[data-theme="dark"] .winter-storybook .bottom-nav { border-color: #334155 !important; background: rgba(15,23,42,.96) !important; box-shadow: 0 -6px 20px rgba(0,0,0,.3); }
+html[data-theme="dark"] .theme-menu { border-color: #334155; background: #0f172a; }
+html[data-theme="dark"] .theme-menu button { color: #e2e8f0; }
+html[data-theme="dark"] .theme-menu button:hover,
+html[data-theme="dark"] .theme-menu button[aria-checked="true"] { background: #1e3a8a; color: #dbeafe; }
+
+/* Snow White: royal blue, apple red, gold, and a small illustration on the hero. */
+html[data-theme="snowwhite"] { background: #eaf3ff; }
+html[data-theme="snowwhite"] .winter-storybook {
+  background: radial-gradient(circle at 88% 9%, rgba(255,255,255,.98) 0 5%, transparent 5.4%), linear-gradient(145deg, #d9e9ff 0%, #fffdf5 55%, #fff0c4 100%) !important;
+  color: #182a4b;
+}
+html[data-theme="snowwhite"] .storybook-hero {
+  min-height: 10.75rem;
+  padding-right: 8.25rem;
+}
+html[data-theme="snowwhite"] .storybook-hero::after {
+  content: "";
+  position: absolute;
+  top: -.85rem;
+  right: -.85rem;
+  z-index: 0;
+  width: 9.25rem;
+  height: 12.5rem;
+  background: url("/images/snow_white.png") top right / contain no-repeat;
+  filter: drop-shadow(0 9px 9px rgba(28,61,123,.18));
+  pointer-events: none;
+}
+html[data-theme="snowwhite"] .hero-title { max-width: 13.5rem; }
+html[data-theme="snowwhite"] .hero-subtitle { max-width: 12rem; }
+html[data-theme="snowwhite"] .winter-storybook .bg-white,
+html[data-theme="snowwhite"] .winter-storybook .station-options {
+  background: linear-gradient(145deg, #fffef9 0%, #fff5c9 100%) !important;
+  border-color: #e6c25b !important;
+  box-shadow: 0 8px 22px rgba(120,83,18,.14);
+}
+html[data-theme="snowwhite"] .winter-storybook .schedule-status,
+html[data-theme="snowwhite"] .winter-storybook .upcoming-more > summary,
+html[data-theme="snowwhite"] .winter-storybook #recent-routes a {
+  background: linear-gradient(145deg, #fffef9 0%, #fff5c9 100%) !important;
+  border-color: #e6c25b !important;
+  box-shadow: 0 6px 16px rgba(120,83,18,.1);
+}
+html[data-theme="snowwhite"] .winter-storybook .storybook-select-card {
+  background: linear-gradient(145deg, #fffdf6 0%, #fff8d8 100%) !important;
+  border-color: #e6c25b !important;
+  box-shadow: 0 14px 30px rgba(120,83,18,.16) !important;
+}
+html[data-theme="snowwhite"] .winter-storybook .storybook-select-card .time-mode-button {
+  border-color: #e6c25b;
+  background: rgba(255,255,255,.62);
+  color: #526887;
+}
+html[data-theme="snowwhite"] .winter-storybook .bg-blue-600 { background: linear-gradient(135deg, #2d5fae, #173f87) !important; box-shadow: 0 10px 22px rgba(23,63,135,.28) !important; }
+html[data-theme="snowwhite"] .winter-storybook .text-blue-600 { color: #b4232b !important; }
+html[data-theme="snowwhite"] .winter-storybook .text-slate-900 { color: #182a4b !important; }
+html[data-theme="snowwhite"] .winter-storybook .text-slate-500 { color: #526887 !important; }
+html[data-theme="snowwhite"] .winter-storybook .text-slate-400 { color: #7488a3 !important; }
+html[data-theme="snowwhite"] .winter-storybook .border-slate-200 { border-color: #b9d1f2 !important; }
+html[data-theme="snowwhite"] .winter-storybook .save-route { border-color: #d1a029; background: #fffdf4; color: #aa1f2b; box-shadow: 0 3px 0 #e6c25b; }
+html[data-theme="snowwhite"] .winter-storybook #search-submit { border-color: #e0b341; }
+html[data-theme="snowwhite"] .winter-storybook .bottom-nav { border-color: #b9d1f2 !important; background: rgba(255,255,255,.96) !important; box-shadow: 0 -6px 20px rgba(29,75,143,.1); }
+html[data-theme="snowwhite"] .winter-storybook .station-trigger,
+html[data-theme="snowwhite"] .winter-storybook .station-query { color: #182a4b; }
+html[data-theme="snowwhite"] .winter-storybook .station-query { border-color: #c8daf1; background: #f7fbff; }
+html[data-theme="snowwhite"] .winter-storybook .time-mode-button.is-active { border-color: #b4232b; background: #fff0ef; color: #aa1f2b; box-shadow: inset 0 0 0 1px #b4232b; }
+html[data-theme="snowwhite"] .winter-storybook .upcoming-more > summary { border-color: #b9d1f2; color: #aa1f2b; }
+html[data-theme="snowwhite"] .theme-menu { border-color: #b9d1f2; background: rgba(255,253,244,.98); }
+html[data-theme="snowwhite"] .theme-menu button { color: #182a4b; }
+html[data-theme="snowwhite"] .theme-menu button:hover,
+html[data-theme="snowwhite"] .theme-menu button[aria-checked="true"] { background: #fff0c4; color: #aa1f2b; }
 
 @media (max-width: 410px) {
   .route-results-header {

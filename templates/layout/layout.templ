@@ -13,10 +13,20 @@ templ Page(title string, content templ.Component) {
 			<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png"/>
 			<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png"/>
-			<link rel="stylesheet" href="/css/output.css?v=20260730-12"/>
-			<link rel="stylesheet" href="/css/station-select.css?v=20260730-12"/>
-			<script src="/js/htmx.min.js?v=20260730-12" defer></script>
-			<script src="/js/app.js?v=20260730-12" defer></script>
+			<script>
+				try {
+					const storedTheme = localStorage.getItem("jadwalkrl.theme");
+					const theme = storedTheme === "princess" ? "snowwhite" : storedTheme;
+					if (["winter", "dark", "snowwhite"].includes(theme)) {
+						document.documentElement.dataset.theme = theme;
+						if (theme === "dark") document.documentElement.classList.add("dark");
+					}
+				} catch (_) {}
+			</script>
+			<link rel="stylesheet" href="/css/output.css?v=20260730-13"/>
+			<link rel="stylesheet" href="/css/station-select.css?v=20260730-13"/>
+			<script src="/js/htmx.min.js?v=20260730-13" defer></script>
+			<script src="/js/app.js?v=20260730-13" defer></script>
 			<title>{ title } · JadwalKRL</title>
 		</head>
 		<body class="winter-storybook min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
@@ -28,7 +38,12 @@ templ Page(title string, content templ.Component) {
 				<div class="bottom-nav-inner mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500">
 					<a class="text-blue-600" href="/">⌂<span class="ml-1">Beranda</span></a>
 					<a href="/saved">☆<span class="ml-1">Tersimpan</span></a>
-					<button aria-label="Ubah tema" onclick="document.documentElement.classList.toggle('dark')">◐ Tema</button>
+					<button id="theme-menu-toggle" type="button" aria-expanded="false" aria-controls="theme-menu">◐ Tema</button>
+				</div>
+				<div id="theme-menu" class="theme-menu hidden" role="menu" aria-label="Pilih tema">
+					<button type="button" role="menuitemradio" data-theme-option="winter">❄ Winter</button>
+					<button type="button" role="menuitemradio" data-theme-option="dark">◐ Gelap</button>
+					<button type="button" role="menuitemradio" data-theme-option="snowwhite">🍎 Snow White</button>
 				</div>
 			</nav>
 		</body>

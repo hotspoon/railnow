@@ -29,14 +29,14 @@ func Page(title string, content templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"id\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"><meta name=\"theme-color\" content=\"#294b9b\"><meta name=\"description\" content=\"Cari jadwal KRL berikutnya dengan cepat\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"icon\" href=\"/icons/favicon.ico\" sizes=\"any\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/icons/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/icons/favicon-16x16.png\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/icons/apple-touch-icon.png\"><link rel=\"stylesheet\" href=\"/css/output.css?v=20260730-12\"><link rel=\"stylesheet\" href=\"/css/station-select.css?v=20260730-12\"><script src=\"/js/htmx.min.js?v=20260730-12\" defer></script><script src=\"/js/app.js?v=20260730-12\" defer></script><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"id\" class=\"bg-slate-50\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"><meta name=\"theme-color\" content=\"#294b9b\"><meta name=\"description\" content=\"Cari jadwal KRL berikutnya dengan cepat\"><link rel=\"manifest\" href=\"/manifest.webmanifest\"><link rel=\"icon\" href=\"/icons/favicon.ico\" sizes=\"any\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/icons/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/icons/favicon-16x16.png\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/icons/apple-touch-icon.png\"><script>\n\t\t\t\ttry {\n\t\t\t\t\tconst storedTheme = localStorage.getItem(\"jadwalkrl.theme\");\n\t\t\t\t\tconst theme = storedTheme === \"princess\" ? \"snowwhite\" : storedTheme;\n\t\t\t\t\tif ([\"winter\", \"dark\", \"snowwhite\"].includes(theme)) {\n\t\t\t\t\t\tdocument.documentElement.dataset.theme = theme;\n\t\t\t\t\t\tif (theme === \"dark\") document.documentElement.classList.add(\"dark\");\n\t\t\t\t\t}\n\t\t\t\t} catch (_) {}\n\t\t\t</script><link rel=\"stylesheet\" href=\"/css/output.css?v=20260730-13\"><link rel=\"stylesheet\" href=\"/css/station-select.css?v=20260730-13\"><script src=\"/js/htmx.min.js?v=20260730-13\" defer></script><script src=\"/js/app.js?v=20260730-13\" defer></script><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout/layout.templ`, Line: 20, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout/layout.templ`, Line: 30, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -50,7 +50,7 @@ func Page(title string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><nav class=\"bottom-nav fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90\"><div class=\"bottom-nav-inner mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500\"><a class=\"text-blue-600\" href=\"/\">⌂<span class=\"ml-1\">Beranda</span></a> <a href=\"/saved\">☆<span class=\"ml-1\">Tersimpan</span></a> <button aria-label=\"Ubah tema\" onclick=\"document.documentElement.classList.toggle('dark')\">◐ Tema</button></div></nav></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</main><nav class=\"bottom-nav fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90\"><div class=\"bottom-nav-inner mx-auto flex max-w-lg justify-around py-3 text-xs font-medium text-slate-500\"><a class=\"text-blue-600\" href=\"/\">⌂<span class=\"ml-1\">Beranda</span></a> <a href=\"/saved\">☆<span class=\"ml-1\">Tersimpan</span></a> <button id=\"theme-menu-toggle\" type=\"button\" aria-expanded=\"false\" aria-controls=\"theme-menu\">◐ Tema</button></div><div id=\"theme-menu\" class=\"theme-menu hidden\" role=\"menu\" aria-label=\"Pilih tema\"><button type=\"button\" role=\"menuitemradio\" data-theme-option=\"winter\">❄ Winter</button> <button type=\"button\" role=\"menuitemradio\" data-theme-option=\"dark\">◐ Gelap</button> <button type=\"button\" role=\"menuitemradio\" data-theme-option=\"snowwhite\">🍎 Snow White</button></div></nav></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

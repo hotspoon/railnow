@@ -614,59 +614,59 @@ func nextCard(d models.Departure, destination string, from, to int64, searchTime
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</span></div><div class=\"next-train-primary mt-5 flex items-end justify-between gap-4\"><div class=\"next-train-destination\"><time class=\"departure-time text-5xl font-black tracking-tight\" data-clock-time>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</span></div><div class=\"next-train-primary mt-5\"><div class=\"next-train-departure\"><time class=\"departure-time text-5xl font-black tracking-tight\" data-clock-time>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(d.Departure)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 205}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 166}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</time><p class=\"mt-2 text-xs font-bold uppercase tracking-widest text-blue-100\">Tujuan kereta</p><h2 class=\"mt-1 text-2xl font-black\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</time></div><div class=\"next-train-countdown text-right\"><p class=\"text-sm text-blue-100\">Berangkat dalam</p><strong class=\"countdown-time text-2xl\" data-countdown=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var29 string
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(trainDestination(d.Route))
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(d.Departure)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 369}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 346}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</h2></div><div class=\"next-train-countdown text-right\"><p class=\"text-sm text-blue-100\">Berangkat dalam</p><strong class=\"countdown-time text-2xl\" data-countdown=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" data-day-offset=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var30 string
-		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(d.Departure)
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("%d", d.DayOffset))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 547}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 397}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\" data-day-offset=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\">--:--</strong></div><div class=\"next-train-destination\"><p class=\"text-xs font-bold uppercase tracking-widest text-blue-100\">Tujuan kereta</p><h2 class=\"mt-1 text-2xl font-black\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var31 string
-		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("%d", d.DayOffset))
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(trainDestination(d.Route))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 598}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/pages.templ`, Line: 117, Col: 606}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var31)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\">--:--</strong></div></div><div class=\"next-train-footer mt-5 flex items-center justify-between border-t border-white/20 pt-4\"><span class=\"train-route-pill rounded-full bg-white/15 px-2 py-1 text-xs font-bold\">Tiba ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</h2></div></div><div class=\"next-train-footer mt-5 flex items-center justify-between border-t border-white/20 pt-4\"><span class=\"train-route-pill rounded-full bg-white/15 px-2 py-1 text-xs font-bold\">Tiba ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
