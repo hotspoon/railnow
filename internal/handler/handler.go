@@ -31,8 +31,8 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not load stations", 500)
 		return
 	}
-	fromID := stationIDByCode(stations, "MRI")
-	toID := stationIDByCode(stations, "BOO")
+	fromID := stationIDByCode(stations, "BUA")
+	toID := stationIDByCode(stations, "CKR")
 	info, e := h.service.Home(r.Context())
 	if e != nil {
 		http.Error(w, "Could not load routes", 500)
