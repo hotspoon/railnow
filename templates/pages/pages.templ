@@ -22,8 +22,6 @@ templ homeContent(stations []models.Station, fromID, toID int64, info models.Sch
 			<a href="/" class="text-xl font-black tracking-tight">🚆 Jadwal KRL</a>
 			<span id="live-clock" class="text-sm font-medium text-slate-500"></span>
 		</div>
-		<h1 class="hero-title mt-7 text-4xl font-black tracking-tight">Cari jadwal <br/><span class="text-blue-600">KRL-mu</span></h1>
-		<p class="hero-subtitle mt-2 text-slate-500">Temukan kereta berikutnya tanpa ribet.</p>
 	</header>
 	@components.SearchForm(stations, fromID, toID, page.SearchTime)
 	@scheduleNotice(info, "mt-3")
